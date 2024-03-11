@@ -3,6 +3,9 @@ package cc.mrbird.febs.cos.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -20,6 +23,12 @@ public class ParkOrderInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
+     * 主键ID
+     */
+    @TableId(type = IdType.AUTO)
+    private Integer id;
+
+    /**
      * 停车位ID
      */
     private Integer spaceId;
@@ -32,12 +41,12 @@ public class ParkOrderInfo implements Serializable {
     /**
      * 开始停车时间
      */
-    private LocalDateTime startDate;
+    private String startDate;
 
     /**
      * 停车结束时间
      */
-    private LocalDateTime endDate;
+    private String endDate;
 
     /**
      * 停车时常（分钟）
@@ -57,7 +66,7 @@ public class ParkOrderInfo implements Serializable {
     /**
      * 支付时间
      */
-    private LocalDateTime payDate;
+    private String payDate;
 
 
 }
