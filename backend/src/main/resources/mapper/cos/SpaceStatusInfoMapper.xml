@@ -19,13 +19,34 @@
                 (si.id = ssi.space_id)
         where
             1 = 1
-        <if test="spaceInfo.spaceName != null and spaceInfo.spaceName != ''">
-            AND si.name LIKE CONCAT('%',#{spaceInfo.spaceName},'%')
+        <if test="spaceStatusInfo.spaceName != null and spaceStatusInfo.spaceName != ''">
+            AND si.name LIKE CONCAT('%',#{spaceStatusInfo.spaceName},'%')
         </if>
-        <if test="spaceInfo.code != null and spaceInfo.code != ''">
-            AND si.code LIKE CONCAT('%',#{spaceInfo.code},'%')
+        <if test="spaceStatusInfo.code != null and spaceStatusInfo.code != ''">
+            AND si.code LIKE CONCAT('%',#{spaceStatusInfo.code},'%')
         </if>
         order by
             si.create_date desc
+    </select>
+
+    <!-- 获取车位状态图 -->
+    <select id="selectStatusCheck" resultType="java.util.LinkedHashMap">
+        select
+        ssi.id,
+        ssi.space_id,
+        ssi.status,
+        si.name as spaceName,
+        si.`space` as spaceAddress,
+        si.code,
+        si.images,
+        si.price
+        from
+        space_status_info ssi
+        left join space_info si on
+        (si.id = ssi.space_id)
+        where
+        1 = 1
+        order by
+        si.create_date desc
     </select>
 </mapper>

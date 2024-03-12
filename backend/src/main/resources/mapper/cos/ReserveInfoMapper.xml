@@ -25,7 +25,7 @@
                 left join space_info si on
                 (si.id = ri.space_id)
                 left join vehicle_info vi on
-                (vi.id = poi.vehicle_id)
+                (vi.id = ri.vehicle_id)
                 left join user_info ui on
                 (ui.id = vi.user_id)
         where

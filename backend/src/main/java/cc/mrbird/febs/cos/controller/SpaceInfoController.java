@@ -3,12 +3,16 @@ package cc.mrbird.febs.cos.controller;
 
 import cc.mrbird.febs.common.utils.R;
 import cc.mrbird.febs.cos.entity.SpaceInfo;
+import cc.mrbird.febs.cos.entity.SpaceStatusInfo;
 import cc.mrbird.febs.cos.service.ISpaceInfoService;
+import cc.mrbird.febs.cos.service.ISpaceStatusInfoService;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,6 +24,8 @@ import java.util.List;
 public class SpaceInfoController {
 
     private final ISpaceInfoService spaceInfoService;
+
+    private final ISpaceStatusInfoService spaceStatusInfoService;
 
     /**
      * 分页获取车位信息
@@ -62,7 +68,16 @@ public class SpaceInfoController {
      */
     @PostMapping
     public R save(SpaceInfo spaceInfo) {
-        return R.ok(spaceInfoService.save(spaceInfo));
+        spaceInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        spaceInfo.setCode("SP-" + System.currentTimeMillis());
+
+        spaceInfoService.save(spaceInfo);
+        // 添加车位状态
+        SpaceStatusInfo spaceStatusInfo = new SpaceStatusInfo();
+        spaceStatusInfo.setStatus("0");
+        spaceStatusInfo.setSpaceId(spaceInfo.getId());
+
+        return R.ok(spaceStatusInfoService.save(spaceStatusInfo));
     }
 
     /**

@@ -36,6 +36,16 @@ public class ParkOrderInfoController {
     }
 
     /**
+     * 查询主页信息
+     *
+     * @return 结果
+     */
+    @GetMapping("/home/data")
+    public R homeData() {
+        return R.ok(parkOrderInfoService.homeData());
+    }
+
+    /**
      * 订单信息详情
      *
      * @param id 订单ID

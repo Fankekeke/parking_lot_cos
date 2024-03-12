@@ -21,4 +21,11 @@ public interface IParkOrderInfoService extends IService<ParkOrderInfo> {
      * @return 结果
      */
     IPage<LinkedHashMap<String, Object>> selectOrderPage(Page<ParkOrderInfo> page, ParkOrderInfo parkOrderInfo);
+
+    /**
+     * 查询主页信息
+     *
+     * @return 结果
+     */
+    LinkedHashMap<String, Object> homeData();
 }

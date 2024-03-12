@@ -34,6 +34,16 @@ public class SpaceStatusInfoController {
     }
 
     /**
+     * 获取车位状态图
+     *
+     * @return 结果
+     */
+    @GetMapping("/status/list")
+    public R selectStatusCheck() {
+        return R.ok(spaceStatusInfoService.selectStatusCheck());
+    }
+
+    /**
      * 车位状态信息详情
      *
      * @param id 车位状态ID

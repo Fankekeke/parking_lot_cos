@@ -34,6 +34,11 @@ public class RuleInfo implements Serializable {
     private String name;
 
     /**
+     * 会员编号
+     */
+    private String code;
+
+    /**
      * 价格
      */
     private BigDecimal price;

@@ -9,7 +9,7 @@
         bi.title,
         bi.content,
         bi.images,
-        bi.date AS createDate,
+        bi.date,
         bi.publisher,
         bi.rack_up AS rackUp,
         bi.type

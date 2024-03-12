@@ -6,6 +6,7 @@
     <select id="selectRulePage" resultType="java.util.LinkedHashMap">
         select
             id,
+            code,
             name,
             price,
             days,

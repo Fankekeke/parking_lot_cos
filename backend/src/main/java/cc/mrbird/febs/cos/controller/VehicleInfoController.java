@@ -4,11 +4,13 @@ package cc.mrbird.febs.cos.controller;
 import cc.mrbird.febs.common.utils.R;
 import cc.mrbird.febs.cos.entity.VehicleInfo;
 import cc.mrbird.febs.cos.service.IVehicleInfoService;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -62,6 +64,8 @@ public class VehicleInfoController {
      */
     @PostMapping
     public R save(VehicleInfo vehicleInfo) {
+        vehicleInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+        vehicleInfo.setVehicleNo("AD-" + System.currentTimeMillis());
         return R.ok(vehicleInfoService.save(vehicleInfo));
     }
 
