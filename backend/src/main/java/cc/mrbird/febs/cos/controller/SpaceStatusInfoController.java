@@ -30,7 +30,7 @@ public class SpaceStatusInfoController {
      */
     @GetMapping("/page")
     public R page(Page<SpaceStatusInfo> page, SpaceStatusInfo spaceStatusInfo) {
-        return R.ok();
+        return R.ok(spaceStatusInfoService.selectSpacePage(page, spaceStatusInfo));
     }
 
     /**

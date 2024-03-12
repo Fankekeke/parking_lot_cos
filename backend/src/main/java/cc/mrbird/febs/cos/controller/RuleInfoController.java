@@ -32,7 +32,7 @@ public class RuleInfoController {
      */
     @GetMapping("/page")
     public R page(Page<RuleInfo> page, RuleInfo ruleInfo) {
-        return R.ok();
+        return R.ok(ruleInfoService.selectRulePage(page, ruleInfo));
     }
 
     /**

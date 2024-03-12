@@ -32,7 +32,7 @@ public class ParkOrderInfoController {
      */
     @GetMapping("/page")
     public R page(Page<ParkOrderInfo> page, ParkOrderInfo parkOrderInfo) {
-        return R.ok();
+        return R.ok(parkOrderInfoService.selectOrderPage(page, parkOrderInfo));
     }
 
     /**
