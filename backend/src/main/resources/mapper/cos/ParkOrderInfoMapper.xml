@@ -1,5 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cc.mrbird.febs.cos.mapper.ParkOrderInfoMapper">
+<mapper namespace="cc.mrbird.febs.cos.dao.ParkOrderInfoMapper">
 
+    <!-- 分页获取订单信息 -->
+    <select id="selectOrderPage" resultType="java.util.LinkedHashMap">
+        select
+            poi.id,
+            poi.space_id,
+            poi.vehicle_id,
+            poi.start_date,
+            poi.end_date,
+            poi.total_time,
+            poi.price,
+            poi.total_price,
+            poi.pay_date,
+            si.name as spaceName,
+            si.`space` as spaceAddress,
+            vi.vehicle_number ,
+            vi.images as vehicleImages,
+            ui.code,
+            ui.name,
+            ui.images,
+            ui.phone,
+            ui.email
+        from
+            park_order_info poi
+                left join space_info si on
+                (si.id = poi.space_id)
+                left join vehicle_info vi on
+                (vi.id = poi.vehicle_id)
+                left join user_info ui on
+                (ui.id = vi.user_id)
+        where
+            1 = 1
+        <if test="parkOrderInfo.spaceName != null and parkOrderInfo.spaceName != ''">
+            AND si.name LIKE CONCAT('%',#{parkOrderInfo.spaceName},'%')
+        </if>
+        <if test="parkOrderInfo.vehicleNumber != null and parkOrderInfo.vehicleNumber != ''">
+            AND vi.vehicle_number LIKE CONCAT('%',#{parkOrderInfo.vehicleNumber},'%')
+        </if>
+        <if test="parkOrderInfo.userName != null and parkOrderInfo.userName != ''">
+            AND ui.name LIKE CONCAT('%',#{parkOrderInfo.userName},'%')
+        </if>
+        order by
+            poi.pay_date desc
+    </select>
 </mapper>
