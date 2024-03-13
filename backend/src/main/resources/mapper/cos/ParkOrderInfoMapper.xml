@@ -173,4 +173,204 @@
         ORDER BY
             days ASC
     </select>
+
+    <!-- 房间类型销量比率统计 -->
+    <select id="selectTypeRateByMonth" resultType="java.util.LinkedHashMap">
+        select
+        rt.id,
+        rt.name,
+        count(oi.id) as count
+        from
+        space_info rt
+        left join park_order_info oi on
+        (rt.id = oi.space_id
+        <if test="year != null and year != ''">
+            AND DATE_FORMAT(oi.pay_date, '%Y') = #{year}
+        </if>
+        <if test="month != null and month != ''">
+            AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
+        </if>
+        )
+        where
+        1 = 1
+        group by
+        rt.id
+    </select>
+
+    <!-- 房间类型销售比率统计 -->
+    <select id="selectTypePriceRateByMonth" resultType="java.util.LinkedHashMap">
+        select
+        rt.id,
+        rt.name,
+        IFNULL(SUM(oi.total_price), 0) AS count
+        from
+        space_info rt
+        left join park_order_info oi on
+        (rt.id = oi.space_id
+        <if test="year != null and year != ''">
+            AND DATE_FORMAT(oi.pay_date, '%Y') = #{year}
+        </if>
+        <if test="month != null and month != ''">
+            AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
+        </if>
+        )
+        where
+        1 = 1
+        group by
+        rt.id
+    </select>
+
+    <!-- 按月统计收益统计 -->
+    <select id="selectPriceByMonth" resultType="java.util.LinkedHashMap">
+        select
+        tempDay.date,
+        IFNULL(SUM(oi.total_price), 0) AS price
+        from
+        (
+        select
+        date
+        from
+        (
+        select
+        DATE_FORMAT(DATE_SUB(last_day(#{checkDate}), interval xc-1 day), '%Y-%m-%d') as date
+        from
+        (
+        select
+        @xi := @xi + 1 as xc
+        from
+        (
+        select
+        1
+        union
+        select
+        2
+        union
+        select
+        3
+        union
+        select
+        4
+        union
+        select
+        5
+        union
+        select
+        6) xc1,
+        (
+        select
+        1
+        union
+        select
+        2
+        union
+        select
+        3
+        union
+        select
+        4
+        union
+        select
+        5
+        union
+        select
+        6) xc2,
+        (
+        select
+        @xi := 0) xc0
+        ) xcxc) x0
+        where
+        x0.date >= (
+        select
+        date_add(#{checkDate}, interval-day(#{checkDate})+ 1 day))) as tempDay
+        left join park_order_info oi on
+        (DATE_FORMAT( oi.pay_date, '%Y-%m-%d' ) = DATE_FORMAT( tempDay.date, '%Y-%m-%d')
+        <if test="year != null and year != ''">
+            AND DATE_FORMAT(oi.pay_date, '%Y') = #{year}
+        </if>
+        <if test="month != null and month != ''">
+            AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
+        </if>
+        )
+        where
+        1 = 1
+        group by
+        tempDay.date
+    </select>
+
+    <!-- 按月统计工单统计 -->
+    <select id="selectOrderNumByMonth" resultType="java.util.LinkedHashMap">
+        select
+        tempDay.date,
+        count(oi.id) as count
+        from
+        (
+        select
+        date
+        from
+        (
+        select
+        DATE_FORMAT(DATE_SUB(last_day(#{checkDate}), interval xc-1 day), '%Y-%m-%d') as date
+        from
+        (
+        select
+        @xi := @xi + 1 as xc
+        from
+        (
+        select
+        1
+        union
+        select
+        2
+        union
+        select
+        3
+        union
+        select
+        4
+        union
+        select
+        5
+        union
+        select
+        6) xc1,
+        (
+        select
+        1
+        union
+        select
+        2
+        union
+        select
+        3
+        union
+        select
+        4
+        union
+        select
+        5
+        union
+        select
+        6) xc2,
+        (
+        select
+        @xi := 0) xc0
+        ) xcxc) x0
+        where
+        x0.date >= (
+        select
+        date_add(#{checkDate}, interval-day(#{checkDate})+ 1 day))) as tempDay
+        left join park_order_info oi on
+        (DATE_FORMAT( oi.pay_date, '%Y-%m-%d' ) = DATE_FORMAT( tempDay.date, '%Y-%m-%d')
+        <if test="year != null and year != ''">
+            AND DATE_FORMAT(oi.pay_date, '%Y') = #{year}
+        </if>
+        <if test="month != null and month != ''">
+            AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
+        </if>
+        )
+        where
+        1 = 1
+        group by
+        tempDay.date
+    </select>
 </mapper>

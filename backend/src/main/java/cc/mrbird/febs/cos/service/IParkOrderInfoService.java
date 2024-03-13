@@ -28,4 +28,12 @@ public interface IParkOrderInfoService extends IService<ParkOrderInfo> {
      * @return 结果
      */
     LinkedHashMap<String, Object> homeData();
+
+    /**
+     * 数据统计
+     *
+     * @param checkDate 选择日期
+     * @return 结果
+     */
+    LinkedHashMap<String, Object> selectStatistics(String checkDate);
 }

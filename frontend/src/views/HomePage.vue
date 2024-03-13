@@ -28,7 +28,7 @@
                 <head-info title="总收益" :content="titleData.totalRevenue" :center="false" :bordered="false"/>
               </a-col>
               <a-col :span="4">
-                <head-info title="总订单量" :content="titleData.totalOrderNum" :center="false" :bordered="false"/>
+                <head-info title="客户数量" :content="titleData.totalOrderNum" :center="false" :bordered="false"/>
               </a-col>
               <a-col :span="4">
                 <head-info title="车位数量" :content="titleData.roomNum" :center="false"/>

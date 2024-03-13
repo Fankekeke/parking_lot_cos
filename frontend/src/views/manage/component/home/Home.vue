@@ -71,12 +71,12 @@
       </a-col>
     </a-row>
     <a-row style="margin-top: 15px" v-if="user.roleId == 74">
-      <a-col :span="9">
-        <a-card hoverable :bordered="false" style="width: 100%">
-          <a-skeleton active v-if="loading" />
-          <apexchart v-if="!loading" type="donut" height="270" :options="chartOptions2" :series="series2"></apexchart>
-        </a-card>
-      </a-col>
+<!--      <a-col :span="9">-->
+<!--        <a-card hoverable :bordered="false" style="width: 100%">-->
+<!--          <a-skeleton active v-if="loading" />-->
+<!--          <apexchart v-if="!loading" type="donut" height="270" :options="chartOptions2" :series="series2"></apexchart>-->
+<!--        </a-card>-->
+<!--      </a-col>-->
 <!--      <a-col :span="15">-->
 <!--        <a-card hoverable :bordered="false" style="width: 100%">-->
 <!--          <a-skeleton active v-if="loading" />-->
@@ -278,7 +278,7 @@ export default {
   methods: {
     selectHomeData () {
       this.$get('/cos/park-order-info/home/data', {roleId: this.user.roleId, userId: this.user.userId}).then((r) => {
-        let titleData = { userNum: r.data.userNum, staffNum: r.data.staffNum, orderNum: r.data.orderNum, amount: r.data.amount }
+        let titleData = { staffNum: r.data.staffNum, totalRevenue: r.data.totalRevenue, totalOrderNum: r.data.totalOrderNum, roomNum: r.data.roomNum }
         this.$emit('setTitle', titleData)
         this.titleData.incomeMonth = r.data.incomeMonth
         this.titleData.workOrderMonth = r.data.workOrderMonth

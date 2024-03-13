@@ -205,9 +205,11 @@ export default {
       let fields = ['vehicleNo', 'vehicleNumber', 'vehicleColor', 'name', 'engineNo', 'carryPassengers', 'principal', 'brand', 'phone', 'userId', 'factoryDate', 'useType', 'emissionStandard', 'fuelType', 'content', 'shopId', 'dayPrice']
       let obj = {}
       Object.keys(vehicle).forEach((key) => {
-        if (key === 'userId' || key === 'deptId') {
-          vehicle[key] = vehicle[key].toString()
-        }
+        setTimeout(() => {
+          if (key === 'userId') {
+            vehicle[key] = vehicle[key].toString()
+          }
+        }, 200)
         if (key === 'factoryDate' && vehicle[key] != null) {
           vehicle[key] = moment(vehicle[key])
         }

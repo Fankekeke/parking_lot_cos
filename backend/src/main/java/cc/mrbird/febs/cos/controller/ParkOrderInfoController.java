@@ -46,6 +46,17 @@ public class ParkOrderInfoController {
     }
 
     /**
+     * 数据统计
+     *
+     * @param checkDate 选择日期
+     * @return 结果
+     */
+    @GetMapping("/statistics")
+    public R selectRoomStatistics(@RequestParam(value = "checkDate", required = false) String checkDate) {
+        return R.ok(parkOrderInfoService.selectStatistics(checkDate));
+    }
+
+    /**
      * 订单信息详情
      *
      * @param id 订单ID

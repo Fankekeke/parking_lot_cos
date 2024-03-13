@@ -5,6 +5,7 @@ import cc.mrbird.febs.cos.entity.ParkOrderInfo;
 import cc.mrbird.febs.cos.dao.ParkOrderInfoMapper;
 import cc.mrbird.febs.cos.service.*;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -62,9 +63,9 @@ public class ParkOrderInfoServiceImpl extends ServiceImpl<ParkOrderInfoMapper, P
         // 客户数量
         Integer userNum = userInfoService.count();
         // 车辆数量
-        Integer vehicleNum = vehicleInfoService.count();
+        Integer staffNum = vehicleInfoService.count();
         // 车位数量
-        Integer orderNum = spaceInfoService.count();
+        Integer roomNum = spaceInfoService.count();
         // 总收益
         BigDecimal amount = baseMapper.selectAmountPrice();
         // 十天内缴费记录
@@ -75,16 +76,54 @@ public class ParkOrderInfoServiceImpl extends ServiceImpl<ParkOrderInfoMapper, P
         result.put("workOrderMonth", workOrderMonth);
         result.put("incomeYear", incomeYear);
         result.put("workOrderYear", workOrderYear);
-        result.put("userNum", userNum);
-        result.put("vehicleNum", vehicleNum);
-        result.put("orderNum", orderNum);
-        result.put("amount", amount);
+        result.put("totalOrderNum", userNum);
+        result.put("staffNum", staffNum);
+        result.put("roomNum", roomNum);
+        result.put("totalRevenue", amount);
         result.put("paymentRecord", paymentRecord);
         result.put("orderRecord", orderRecord);
 
         // 公告信息
         List<BulletinInfo> bulletinList = bulletinInfoService.list();
         result.put("bulletin", bulletinList);
+        return result;
+    }
+
+    /**
+     * 数据统计
+     *
+     * @param checkDate 选择日期
+     * @return 结果
+     */
+    @Override
+    public LinkedHashMap<String, Object> selectStatistics(String checkDate) {
+        if (StrUtil.isEmpty(checkDate)) {
+            checkDate = DateUtil.formatDate(new Date());
+        }
+
+        // 返回数据
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+
+        // 获取当前月份及当前月份
+        String year = StrUtil.toString(DateUtil.year(DateUtil.parseDate(checkDate)));
+        String month = StrUtil.toString(DateUtil.month(DateUtil.parseDate(checkDate)) + 1);
+
+        // 本月收益
+        List<LinkedHashMap<String, Object>> priceByMonth = baseMapper.selectPriceByMonth(year, month, checkDate);
+        result.put("priceByMonth", priceByMonth);
+
+        // 本月订单
+        List<LinkedHashMap<String, Object>> orderNumByMonth = baseMapper.selectOrderNumByMonth(year, month, checkDate);
+        result.put("orderNumByMonth", orderNumByMonth);
+
+        // 类型销量统计
+        List<LinkedHashMap<String, Object>> typeOrderNumRateByMonth = baseMapper.selectTypeRateByMonth(year, month);
+        result.put("typeOrderNumRateByMonth", typeOrderNumRateByMonth);
+
+        // 类型销售统计
+        List<LinkedHashMap<String, Object>> typePriceRateByMonth = baseMapper.selectTypePriceRateByMonth(year, month);
+        result.put("typePriceRateByMonth", typePriceRateByMonth);
+
         return result;
     }
 }

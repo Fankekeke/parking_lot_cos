@@ -208,14 +208,8 @@ export default {
   },
   mounted () {
     this.search()
-    this.handleSearch()
   },
   methods: {
-    handleSearch () {
-      this.$get('/cos/room-type/list').then((r) => {
-        this.typeList = r.data.data
-      })
-    },
     search () {
       this.getStatusList({
         ...this.queryParams
@@ -226,7 +220,7 @@ export default {
       if (params.checkDate) {
         params.checkDate = moment(params.checkDate).format('YYYY-MM-DD')
       }
-      this.$get(`/cos/order-info/statistics`, params).then((r) => {
+      this.$get(`/cos/park-order-info/statistics`, params).then((r) => {
         this.priceByMonth = r.data.priceByMonth
         this.orderNumByMonth = r.data.orderNumByMonth
         this.typeOrderNumRateByMonth = r.data.typeOrderNumRateByMonth
@@ -253,11 +247,11 @@ export default {
         }
 
         if (r.data.typeOrderNumRateByMonth !== null && r.data.typeOrderNumRateByMonth.length !== 0) {
-          this.chartOptions3.labels = Array.from(r.data.typeOrderNumRateByMonth, ({typeName}) => typeName)
+          this.chartOptions3.labels = Array.from(r.data.typeOrderNumRateByMonth, ({name}) => name)
           this.series3 = Array.from(r.data.typeOrderNumRateByMonth, ({count}) => count)
         }
         if (r.data.typePriceRateByMonth !== null && r.data.typePriceRateByMonth.length !== 0) {
-          this.chartOptions4.labels = Array.from(r.data.typePriceRateByMonth, ({typeName}) => typeName)
+          this.chartOptions4.labels = Array.from(r.data.typePriceRateByMonth, ({name}) => name)
           this.series4 = Array.from(r.data.typePriceRateByMonth, ({count}) => count)
         }
         setTimeout(() => {
