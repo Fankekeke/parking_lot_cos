@@ -7,18 +7,18 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="订单编号"
+                label="车位名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.code"/>
+                <a-input v-model="queryParams.spaceName"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="房间号"
+                label="车牌号码"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.name"/>
+                <a-input v-model="queryParams.vehicleNumber"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
@@ -39,8 +39,8 @@
     </div>
     <div>
       <div class="operator">
-<!--        <a-button type="primary" ghost @click="add">添加订单</a-button>-->
-        <a-button @click="batchDelete">删除</a-button>
+<!--        <a-button type="primary" ghost @click="add">新增</a-button>-->
+<!--        <a-button @click="batchDelete">删除</a-button>-->
       </div>
       <!-- 表格区域 -->
       <a-table ref="TableInfo"
@@ -52,53 +52,44 @@
                :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
                :scroll="{ x: 900 }"
                @change="handleTableChange">
-        <template slot="titleShow" slot-scope="text, record">
-          <template>
-            <a-tooltip>
-              <template slot="title">
-                {{ record.title }}
-              </template>
-              {{ record.title.slice(0, 8) }} ...
-            </a-tooltip>
-          </template>
-        </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="file-search" @click="orderViewOpen(record)" title="详 情"></a-icon>
-          <a-icon v-if="record.orderStatus == 1 && record.recedeFlag == 0 && record.evaluateId == null" type="pushpin" @click="handleorderEvaluateOpen(record)" title="评 价" style="margin-left: 15px"></a-icon>
+          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
+          <a-icon type="file-search" @click="orderViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
     </div>
+    <order-add
+      v-if="orderAdd.visiable"
+      @close="handleorderAddClose"
+      @success="handleorderAddSuccess"
+      :orderAddVisiable="orderAdd.visiable">
+    </order-add>
+    <order-edit
+      ref="orderEdit"
+      @close="handleorderEditClose"
+      @success="handleorderEditSuccess"
+      :orderEditVisiable="orderEdit.visiable">
+    </order-edit>
     <order-view
       @close="handleorderViewClose"
       :orderShow="orderView.visiable"
       :orderData="orderView.data">
     </order-view>
-    <order-add
-      @close="handleorderAddClose"
-      @success="handleorderAddSuccess"
-      :orderAddShow="orderAdd.visiable">
-    </order-add>
-    <order-evaluate
-      @close="handleorderEvaluateClose"
-      @success="handleorderEvaluateSuccess"
-      :orderEvaluateVisiable="orderEvaluate.visiable"
-      :orderData="orderEvaluate.data">
-    </order-evaluate>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
+import orderAdd from './OrderAdd.vue'
+import orderEdit from './OrderEdit.vue'
+import orderView from './OrderView.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
-import OrderAdd from './OrderAdd'
-import OrderEvaluate from './OrderEvaluate'
-import OrderView from './OrderView'
 moment.locale('zh-cn')
 
 export default {
   name: 'order',
-  components: {OrderView, OrderEvaluate, RangeDate, OrderAdd},
+  components: {orderAdd, orderEdit, orderView, RangeDate},
   data () {
     return {
       advanced: false,
@@ -109,10 +100,6 @@ export default {
         visiable: false
       },
       orderView: {
-        visiable: false,
-        data: null
-      },
-      orderEvaluate: {
         visiable: false,
         data: null
       },
@@ -131,10 +118,6 @@ export default {
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
-      orderAuditView: {
-        visiable: false,
-        data: null
-      },
       userList: []
     }
   },
@@ -143,12 +126,12 @@ export default {
       currentUser: state => state.account.user
     }),
     columns () {
-      return [{
-        title: '订单编号',
-        dataIndex: 'code'
+      return [ {
+        title: '订单用户',
+        dataIndex: 'name'
       }, {
-        title: '客户名称',
-        dataIndex: 'userName',
+        title: '车牌号码',
+        dataIndex: 'vehicleNumber',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -157,20 +140,20 @@ export default {
           }
         }
       }, {
-        title: '房间图片',
-        dataIndex: 'images',
+        title: '车辆图片',
+        dataIndex: 'vehicleImages',
         customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="user" />
+          if (!record.vehicleImages) return <a-avatar shape="square" icon="user" />
           return <a-popover>
             <template slot="content">
-              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.vehicleImages.split(',')[0] } />
             </template>
-            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.vehicleImages.split(',')[0] } />
           </a-popover>
         }
       }, {
-        title: '房间类型',
-        dataIndex: 'typeName',
+        title: '车位名称',
+        dataIndex: 'spaceName',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -179,27 +162,7 @@ export default {
           }
         }
       }, {
-        title: '房间号',
-        dataIndex: 'name',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '订单总额',
-        dataIndex: 'totalPrice',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text + '元'
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '入住时间',
+        title: '驶入时间',
         dataIndex: 'startDate',
         customRender: (text, row, index) => {
           if (text !== null) {
@@ -209,7 +172,7 @@ export default {
           }
         }
       }, {
-        title: '离开时间',
+        title: '驶出时间',
         dataIndex: 'endDate',
         customRender: (text, row, index) => {
           if (text !== null) {
@@ -219,21 +182,18 @@ export default {
           }
         }
       }, {
-        title: '订单状态',
-        dataIndex: 'orderStatus',
+        title: '总时长（分钟）',
+        dataIndex: 'totalTime',
         customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag>待付款</a-tag>
-            case '1':
-              return <a-tag>已支付</a-tag>
-            default:
-              return '- -'
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
           }
         }
       }, {
-        title: '下单时间',
-        dataIndex: 'createDate',
+        title: '总费用（元）',
+        dataIndex: 'totalPrice',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -252,46 +212,6 @@ export default {
     this.fetch()
   },
   methods: {
-    orderComplete (row) {
-      this.$get(`/cos/order-info/audit`, {
-        'orderCode': row.code,
-        'status': 3
-      }).then((r) => {
-        this.$message.success('订单完成')
-        this.fetch()
-      })
-    },
-    orderStatusOpen (row) {
-      this.orderStatusView.data = row
-      this.orderStatusView.visiable = true
-    },
-    orderAuditOpen (row) {
-      this.orderAuditView.data = row
-      this.orderAuditView.visiable = true
-    },
-    orderViewOpen (row) {
-      this.orderView.data = row
-      this.orderView.visiable = true
-    },
-    handleorderViewClose () {
-      this.orderView.visiable = false
-    },
-    handleorderStatusViewClose () {
-      this.orderStatusView.visiable = false
-    },
-    handleorderStatusViewSuccess () {
-      this.orderStatusView.visiable = false
-      this.$message.success('修改成功')
-      this.fetch()
-    },
-    handleorderAuditViewClose () {
-      this.orderAuditView.visiable = false
-    },
-    handleorderAuditViewSuccess () {
-      this.orderAuditView.visiable = false
-      this.$message.success('分配成功')
-      this.fetch()
-    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -304,33 +224,28 @@ export default {
     handleorderAddClose () {
       this.orderAdd.visiable = false
     },
-    handleorderEvaluateOpen (row) {
-      this.orderEvaluate.data = row
-      this.orderEvaluate.visiable = true
-    },
-    handleorderEvaluateClose () {
-      this.orderEvaluate.visiable = false
-    },
     handleorderAddSuccess () {
       this.orderAdd.visiable = false
-      this.$message.success('添加平台订单成功')
-      this.search()
-    },
-    handleorderEvaluateSuccess () {
-      this.orderEvaluate.visiable = false
-      this.$message.success('订单评价成功')
+      this.$message.success('新增订单成功')
       this.search()
     },
     edit (record) {
       this.$refs.orderEdit.setFormValues(record)
       this.orderEdit.visiable = true
     },
+    orderViewOpen (row) {
+      this.orderView.data = row
+      this.orderView.visiable = true
+    },
+    handleorderViewClose () {
+      this.orderView.visiable = false
+    },
     handleorderEditClose () {
       this.orderEdit.visiable = false
     },
     handleorderEditSuccess () {
       this.orderEdit.visiable = false
-      this.$message.success('修改产品成功')
+      this.$message.success('修改订单成功')
       this.search()
     },
     handleDeptChange (value) {
@@ -348,7 +263,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/cos/order-info/' + ids).then(() => {
+          that.$delete('/cos/park-order-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -418,8 +333,11 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
+      if (params.delFlag === undefined) {
+        delete params.delFlag
+      }
       params.userId = this.currentUser.userId
-      this.$get('/cos/order-info/page', {
+      this.$get('/cos/park-order-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

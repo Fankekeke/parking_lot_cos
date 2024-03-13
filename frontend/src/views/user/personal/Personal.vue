@@ -29,7 +29,7 @@
             <a-col :span="12">
               <a-form-item label='邮箱地址' v-bind="formItemLayout">
                 <a-input v-decorator="[
-                'mail'
+                'email'
                 ]"/>
               </a-form-item>
             </a-col>
@@ -48,13 +48,6 @@
                   <a-select-option value="1">男</a-select-option>
                   <a-select-option value="2">女</a-select-option>
                 </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :span="12">
-              <a-form-item label='身份证号码' v-bind="formItemLayout">
-                <a-input v-decorator="[
-                'idCard'
-                ]"/>
               </a-form-item>
             </a-col>
             <a-col :span="24">
@@ -156,7 +149,7 @@ export default {
     getListData (value) {
       let listData = []
       this.courseInfo.forEach(item => {
-        if ((moment(value).format('YYYY-MM-DD')) === (moment(item.createDate).format('YYYY-MM-DD'))) {
+        if ((moment(value).format('YYYY-MM-DD')) === (moment(item.payDate).format('YYYY-MM-DD'))) {
           listData.push({type: 'success', content: item.code})
         }
       })
@@ -164,7 +157,7 @@ export default {
     },
     getExpertInfo (userId) {
       this.dataLoading = true
-      this.$get(`/cos/user-info/userInfo/detail/${userId}`).then((r) => {
+      this.$get(`/cos/user-info/detail/${userId}`).then((r) => {
         this.expertInfo = r.data.user
         console.log(this.expertInfo)
         this.setFormValues(this.expertInfo)
@@ -196,12 +189,15 @@ export default {
     },
     setFormValues ({...expert}) {
       this.rowId = expert.id
-      let fields = ['code', 'name', 'phone', 'sex', 'mail', 'images', 'idCard', 'createDate']
+      let fields = ['code', 'name', 'phone', 'sex', 'email', 'images', 'createDate']
       let obj = {}
       Object.keys(expert).forEach((key) => {
         if (key === 'images') {
           this.fileList = []
           this.imagesInit(expert['images'])
+        }
+        if (key === 'sex') {
+          expert[key] = expert[key].toString()
         }
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)

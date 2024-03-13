@@ -1,41 +1,51 @@
 <template>
-  <a-modal v-model="show" title="美食推荐详情" @cancel="onClose" :width="1000">
+  <a-modal v-model="show" title="车位预约详情" @cancel="onClose" :width="800">
     <template slot="footer">
       <a-button key="back" @click="onClose" type="danger">
         关闭
       </a-button>
     </template>
-    <div style="font-size: 13px;font-family: SimHei" v-if="foodData !== null">
+    <div style="font-size: 13px;font-family: SimHei" v-if="reserveData !== null">
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">基础信息</span></a-col>
-        <a-col :span="8"><b>店铺名称：</b>
-          {{ foodData.name ? foodData.name : '- -' }}
+        <a-col :span="8"><b>用户编号：</b>
+          {{ reserveData.code ? reserveData.code : '- -' }}
         </a-col>
-        <a-col :span="8"><b>店铺地址：</b>
-          {{ foodData.address ? foodData.address : '- -' }}
-        </a-col>
-      </a-row>
-      <br/>
-      <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col :span="8"><b>推荐人：</b>
-          {{ foodData.recommender }}
+        <a-col :span="8"><b>用户名称：</b>
+          {{ reserveData.name ? reserveData.name : '- -' }}
         </a-col>
         <a-col :span="8"><b>联系方式：</b>
-          {{ foodData.phone }}
-        </a-col>
-        <a-col :span="8"><b>创建时间：</b>
-          {{ foodData.createDate }}
+          {{ reserveData.phone }}
         </a-col>
       </a-row>
       <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col :span="24"><b>推荐内容：</b>
-          {{ foodData.content }}
+        <a-col :span="8"><b>预约开始时间：</b>
+          {{ reserveData.startDate }}
+        </a-col>
+        <a-col :span="8"><b>预约开始时间：</b>
+          {{ reserveData.endDate }}
+        </a-col>
+        <a-col :span="8"><b>会员等级：</b>
+          <span v-if="reserveData.status == 0" style="color: red">结束</span>
+          <span v-if="reserveData.status == 1" style="color: green">预约中</span>
         </a-col>
       </a-row>
       <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">图册</span></a-col>
+        <a-col :span="8"><b>车位名称：</b>
+          {{ reserveData.spaceName }}
+        </a-col>
+        <a-col :span="8"><b>车牌号码：</b>
+          {{ reserveData.vehicleNumber }}
+        </a-col>
+        <a-col :span="8"><b>车位地点：</b>
+          {{ reserveData.spaceAddress }}
+        </a-col>
+      </a-row>
+      <br/>
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">车辆图片</span></a-col>
         <a-col :span="24">
           <a-upload
             name="avatar"
@@ -52,14 +62,6 @@
         </a-col>
       </a-row>
       <br/>
-       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 5px"><span style="font-size: 15px;font-weight: 650;color: #000c17">店铺位置</span></a-col>
-      </a-row>
-      <div>
-        <a-card :bordered="false" style="height: 500px">
-          <div id="areas" style="width: 100%;height: 450px;box-shadow: 3px 3px 3px rgba(0, 0, 0, .2);background:#ec9e3c;color:#fff"></div>
-        </a-card>
-      </div>
     </div>
   </a-modal>
 </template>
@@ -77,20 +79,20 @@ function getBase64 (file) {
   })
 }
 export default {
-  name: 'foodView',
+  name: 'reserveView',
   props: {
-    foodShow: {
+    reserveShow: {
       type: Boolean,
       default: false
     },
-    foodData: {
+    reserveData: {
       type: Object
     }
   },
   computed: {
     show: {
       get: function () {
-        return this.foodShow
+        return this.reserveShow
       },
       set: function () {
       }
@@ -110,24 +112,20 @@ export default {
     }
   },
   watch: {
-    foodShow: function (value) {
+    reserveShow: function (value) {
       if (value) {
-        this.imagesInit(this.foodData.images)
-        setTimeout(() => {
-          baiduMap.initMap('areas')
-          setTimeout(() => {
-            this.local(this.foodData)
-          }, 500)
-        }, 200)
+        if (this.reserveData.vehicleImages) {
+          this.imagesInit(this.reserveData.vehicleImages)
+        }
       }
     }
   },
   methods: {
-    local (foodData) {
+    local (reserveData) {
       baiduMap.clearOverlays()
       baiduMap.rMap().enableScrollWheelZoom(true)
       // eslint-disable-next-line no-undef
-      let point = new BMap.Point(foodData.longitude, foodData.latitude)
+      let point = new BMap.Point(reserveData.longitude, reserveData.latitude)
       baiduMap.pointAdd(point)
       baiduMap.findPoint(point, 16)
       // let driving = new BMap.DrivingRoute(baiduMap.rMap(), {renderOptions:{map: baiduMap.rMap(), autoViewport: true}});

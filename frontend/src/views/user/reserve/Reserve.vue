@@ -7,23 +7,23 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="采购状态"
+                label="车位名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.status"/>
+                <a-input v-model="queryParams.spaceName"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="采购单号"
+                label="车牌号码"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.recordCode"/>
+                <a-input v-model="queryParams.vehicleNumber"/>
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="购买人"
+                label="用户名称"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.userName"/>
@@ -39,6 +39,7 @@
     </div>
     <div>
       <div class="operator">
+<!--        <a-button type="primary" ghost @click="add">新增</a-button>-->
         <a-button @click="batchDelete">删除</a-button>
       </div>
       <!-- 表格区域 -->
@@ -51,46 +52,39 @@
                :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
                :scroll="{ x: 900 }"
                @change="handleTableChange">
-        <template slot="contentShow" slot-scope="text, record">
-          <template>
-            <a-tooltip>
-              <template slot="title">
-                {{ record.content }}
-              </template>
-              {{ record.content.slice(0, 10) }} ...
-            </a-tooltip>
-          </template>
-        </template>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="file-search" @click="recordViewOpen(record)" title="详 情"></a-icon>
-          <a-icon v-if="record.status == 1 && record.checkDay > -3" type="number" @click="passGoods(record)" title="退 货" style="margin-left: 15px"></a-icon>
+          <a-icon type="file-search" @click="reserveViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
     </div>
-    <record-view :evaluateShow="rentView.visiable" :evaluateData="rentView.data" @close="rentView.visiable = false"></record-view>
+    <reserve-view
+      @close="handlereserveViewClose"
+      :reserveShow="reserveView.visiable"
+      :reserveData="reserveView.data">
+    </reserve-view>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
+import reserveView from './ReserveView.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
-import RecordView from './RecordView.vue'
 moment.locale('zh-cn')
 
 export default {
-  name: 'evaluate',
-  components: {RangeDate, RecordView},
+  name: 'reserve',
+  components: {reserveView, RangeDate},
   data () {
     return {
       advanced: false,
-      evaluateAdd: {
+      reserveAdd: {
         visiable: false
       },
-      evaluateEdit: {
+      reserveEdit: {
         visiable: false
       },
-      rentView: {
+      reserveView: {
         visiable: false,
         data: null
       },
@@ -117,38 +111,8 @@ export default {
       currentUser: state => state.account.user
     }),
     columns () {
-      return [{
-        title: '采购单号',
-        dataIndex: 'recordCode'
-      }, {
-        title: '订单价格',
-        dataIndex: 'totalPrice',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text + '元'
-          } else {
-            return '- -'
-          }
-        }
-      }, {
-        title: '采购状态',
-        dataIndex: 'status',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '1':
-              return <a-tag>已支付</a-tag>
-            case '2':
-              return <a-tag>退款中</a-tag>
-            case '3':
-              return <a-tag>已退货</a-tag>
-            case '4':
-              return <a-tag>驳回</a-tag>
-            default:
-              return '- -'
-          }
-        }
-      }, {
-        title: '购买人',
+      return [ {
+        title: '用户名称',
         dataIndex: 'name',
         customRender: (text, row, index) => {
           if (text !== null) {
@@ -156,6 +120,18 @@ export default {
           } else {
             return '- -'
           }
+        }
+      }, {
+        title: '用户头像',
+        dataIndex: 'images',
+        customRender: (text, record, index) => {
+          if (!record.images) return <a-avatar shape="square" icon="user" />
+          return <a-popover>
+            <template slot="content">
+              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+            </template>
+            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+          </a-popover>
         }
       }, {
         title: '联系方式',
@@ -168,20 +144,41 @@ export default {
           }
         }
       }, {
-        title: '头像',
-        dataIndex: 'images',
-        customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="user" />
-          return <a-popover>
-            <template slot="content">
-              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-            </template>
-            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-          </a-popover>
+        title: '车牌号码',
+        dataIndex: 'vehicleNumber',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
         }
       }, {
-        title: '购买时间',
-        dataIndex: 'createDate',
+        title: '预约状态',
+        dataIndex: 'status',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '0':
+              return <a-tag color="red">结束</a-tag>
+            case '1':
+              return <a-tag color="green">预约中</a-tag>
+            default:
+              return '- -'
+          }
+        }
+      }, {
+        title: '预约开始时间',
+        dataIndex: 'startDate',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
+        }
+      }, {
+        title: '预约结束时间',
+        dataIndex: 'endDate',
         customRender: (text, row, index) => {
           if (text !== null) {
             return text
@@ -200,17 +197,6 @@ export default {
     this.fetch()
   },
   methods: {
-    passGoods (row) {
-      row.status = '2'
-      this.$put('/cos/purchase-record', row).then((r) => {
-        this.reset()
-        this.$message.success('提交退货申请成功')
-      })
-    },
-    recordViewOpen (row) {
-      this.rentView.data = row
-      this.rentView.visiable = true
-    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -218,26 +204,33 @@ export default {
       this.advanced = !this.advanced
     },
     add () {
-      this.evaluateAdd.visiable = true
+      this.reserveAdd.visiable = true
     },
-    handleevaluateAddClose () {
-      this.evaluateAdd.visiable = false
+    handlereserveAddClose () {
+      this.reserveAdd.visiable = false
     },
-    handleevaluateAddSuccess () {
-      this.evaluateAdd.visiable = false
-      this.$message.success('新增评价成功')
+    handlereserveAddSuccess () {
+      this.reserveAdd.visiable = false
+      this.$message.success('新增会员成功')
       this.search()
     },
     edit (record) {
-      this.$refs.evaluateEdit.setFormValues(record)
-      this.evaluateEdit.visiable = true
+      this.$refs.reserveEdit.setFormValues(record)
+      this.reserveEdit.visiable = true
     },
-    handleevaluateEditClose () {
-      this.evaluateEdit.visiable = false
+    reserveViewOpen (row) {
+      this.reserveView.data = row
+      this.reserveView.visiable = true
     },
-    handleevaluateEditSuccess () {
-      this.evaluateEdit.visiable = false
-      this.$message.success('修改评价成功')
+    handlereserveViewClose () {
+      this.reserveView.visiable = false
+    },
+    handlereserveEditClose () {
+      this.reserveEdit.visiable = false
+    },
+    handlereserveEditSuccess () {
+      this.reserveEdit.visiable = false
+      this.$message.success('修改会员成功')
       this.search()
     },
     handleDeptChange (value) {
@@ -255,7 +248,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/cos/purchase-record/' + ids).then(() => {
+          that.$delete('/cos/reserve-info/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -325,11 +318,11 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
-      if (params.type === undefined) {
-        delete params.type
+      if (params.delFlag === undefined) {
+        delete params.delFlag
       }
       params.userId = this.currentUser.userId
-      this.$get('/cos/purchase-record/page', {
+      this.$get('/cos/reserve-info/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

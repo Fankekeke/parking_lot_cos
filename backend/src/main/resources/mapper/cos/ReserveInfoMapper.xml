@@ -39,6 +39,9 @@
         <if test="reserveInfo.userName != null and reserveInfo.userName != ''">
             AND ui.name LIKE CONCAT('%',#{reserveInfo.userName},'%')
         </if>
+        <if test="reserveInfo.userId != null and reserveInfo.userId != ''">
+            AND ui.user_id = #{reserveInfo.userId}
+        </if>
         order by
             ri.start_date desc
 

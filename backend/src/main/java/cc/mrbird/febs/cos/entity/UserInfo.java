@@ -62,5 +62,6 @@ public class UserInfo implements Serializable {
      */
     private String email;
 
+    private Integer userId;
 
 }

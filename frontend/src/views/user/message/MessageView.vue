@@ -1,46 +1,42 @@
 <template>
-  <a-modal v-model="show" title="会员订单详情" @cancel="onClose" :width="800">
+  <a-modal v-model="show" title="消息详情" @cancel="onClose" :width="800">
     <template slot="footer">
       <a-button key="back" @click="onClose" type="danger">
         关闭
       </a-button>
     </template>
-    <div style="font-size: 13px;font-family: SimHei" v-if="recordData !== null">
+    <div style="font-size: 13px;font-family: SimHei" v-if="memberData !== null">
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">基础信息</span></a-col>
         <a-col :span="8"><b>用户编号：</b>
-          {{ recordData.userCode ? recordData.userCode : '- -' }}
+          {{ memberData.code ? memberData.code : '- -' }}
         </a-col>
         <a-col :span="8"><b>用户名称：</b>
-          {{ recordData.name ? recordData.name : '- -' }}
+          {{ memberData.name ? memberData.name : '- -' }}
         </a-col>
         <a-col :span="8"><b>联系方式：</b>
-          {{ recordData.phone }}
+          {{ memberData.phone }}
         </a-col>
       </a-row>
       <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col :span="8"><b>订单编号：</b>
-          {{ recordData.code }}
+        <a-col :span="8"><b>发送时间：</b>
+          {{ memberData.createDate }}
         </a-col>
-        <a-col :span="8"><b>价格：</b>
-          {{ recordData.price }} 元
+        <a-col :span="8"><b>邮箱地址：</b>
+          {{ memberData.email }}
         </a-col>
-        <a-col :span="8"><b>会员等级：</b>
-          <span v-if="recordData.status == 0" style="color: red">未支付</span>
-          <span v-if="recordData.status == 1" style="color: green">已支付</span>
+        <a-col :span="8"><b>消息状态：</b>
+          <span v-if="memberData.status == 0">未读</span>
+          <span v-if="memberData.status == 1">已读</span>
         </a-col>
       </a-row>
       <br/>
+      <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col :span="8"><b>支付时间：</b>
-          {{ recordData.payDate }}
-        </a-col>
-        <a-col :span="8"><b>订单编号：</b>
-          {{ recordData.code }}
-        </a-col>
-        <a-col :span="8"><b>会员名称：</b>
-          {{ recordData.memberName }}
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">消息内容</span></a-col>
+        <a-col :span="24">
+          {{ memberData.content ? memberData.content : '- -' }}
         </a-col>
       </a-row>
       <br/>
@@ -61,20 +57,20 @@ function getBase64 (file) {
   })
 }
 export default {
-  name: 'recordView',
+  name: 'memberView',
   props: {
-    recordShow: {
+    memberShow: {
       type: Boolean,
       default: false
     },
-    recordData: {
+    memberData: {
       type: Object
     }
   },
   computed: {
     show: {
       get: function () {
-        return this.recordShow
+        return this.memberShow
       },
       set: function () {
       }
@@ -87,24 +83,27 @@ export default {
       previewVisible: false,
       previewImage: '',
       repairInfo: null,
-      recordInfo: null,
+      reserveInfo: null,
       durgList: [],
       logisticsList: [],
       userInfo: null
     }
   },
   watch: {
-    recordShow: function (value) {
+    memberShow: function (value) {
       if (value) {
+        if (this.memberData.images) {
+          this.imagesInit(this.memberData.images)
+        }
       }
     }
   },
   methods: {
-    local (recordData) {
+    local (memberData) {
       baiduMap.clearOverlays()
       baiduMap.rMap().enableScrollWheelZoom(true)
       // eslint-disable-next-line no-undef
-      let point = new BMap.Point(recordData.longitude, recordData.latitude)
+      let point = new BMap.Point(memberData.longitude, memberData.latitude)
       baiduMap.pointAdd(point)
       baiduMap.findPoint(point, 16)
       // let driving = new BMap.DrivingRoute(baiduMap.rMap(), {renderOptions:{map: baiduMap.rMap(), autoViewport: true}});

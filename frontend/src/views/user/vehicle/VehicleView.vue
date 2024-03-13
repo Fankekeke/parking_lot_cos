@@ -1,47 +1,59 @@
 <template>
-  <a-drawer
-    title="商品详情"
-    :maskClosable="false"
-    width=1250
-    placement="right"
-    :closable="false"
-    @close="onClose"
-    :visible="show"
-    style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
-    <div style="font-size: 13px;font-family: SimHei" v-if="drugInfo !== null">
+  <a-modal v-model="show" title="车辆详情" @cancel="onClose" :width="1000">
+    <template slot="footer">
+      <a-button key="back" @click="onClose" type="danger">
+        关闭
+      </a-button>
+    </template>
+    <div style="font-size: 13px;font-family: SimHei" v-if="vehicleData !== null">
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">商品信息</span></a-col>
-        <a-col :span="8"><b>商品名称：</b>
-          {{ drugInfo.name }}
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">车辆信息</span></a-col>
+        <a-col :span="6"><b>车辆编号：</b>
+          {{ vehicleData.vehicleNo }}
         </a-col>
-        <a-col :span="8"><b>商品编号：</b>
-          {{ drugInfo.code }}
+        <a-col :span="6"><b>车牌号：</b>
+          {{ vehicleData.vehicleNumber ? vehicleData.vehicleNumber : '- -' }}
         </a-col>
-        <a-col :span="8"><b>库存：</b>
-          {{ drugInfo.stockNum }}
+        <a-col :span="6"><b>车辆颜色：</b>
+          {{ vehicleData.vehicleColor ? vehicleData.vehicleColor : '- -' }}
+        </a-col>
+        <a-col :span="6"><b>车辆名称：</b>
+          {{ vehicleData.name }}
         </a-col>
       </a-row>
       <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col :span="8"><b>商品型号：</b>
-          {{ drugInfo.model }}
+        <a-col :span="6"><b>排放标准：</b>
+          {{ vehicleData.emissionStandard }}
         </a-col>
-        <a-col :span="8"><b>单价：</b>
-          {{ drugInfo.price }} 元
+        <a-col :span="6"><b>发动机号码：</b>
+          {{ vehicleData.engineNo }}
         </a-col>
-        <a-col :span="8"><b>创建时间：</b>
-          {{ drugInfo.createDate }}
+        <a-col :span="6"><b>联系电话：</b>
+          {{ vehicleData.phone }}
         </a-col>
-      </a-row>
-      <br/>
-      <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col :span="24"><b>商品描述：</b>
-          {{ drugInfo.remark }}
+        <a-col :span="6"><b>所属用户：</b>
+          {{ vehicleData.userName }}
         </a-col>
       </a-row>
       <br/>
       <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">商品图片</span></a-col>
+        <a-col :span="6"><b>燃料类型：</b>
+          <span v-if="vehicleData.fuelType == 1" style="color: green">燃油</span>
+          <span v-if="vehicleData.fuelType == 2" style="color: green">柴油</span>
+          <span v-if="vehicleData.fuelType == 3" style="color: green">油电混动</span>
+          <span v-if="vehicleData.fuelType == 4" style="color: green">电能</span>
+        </a-col>
+        <br/>
+        <br/>
+        <a-col :span="24"><b>备注：</b>
+          {{ vehicleData.content }}
+        </a-col>
+      </a-row>
+      <br/>
+      <br/>
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">图册</span></a-col>
         <a-col :span="24">
           <a-upload
             name="avatar"
@@ -58,28 +70,14 @@
         </a-col>
       </a-row>
       <br/>
-      <br/>
-      <a-row style="padding-left: 24px;padding-right: 24px;">
-        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">购买数量</span></a-col>
-        <a-col :span="6">
-          <a-input-number id="inputNumber" v-model="value" :min="1" :max="drugData.stockNum" style="width: 100%"/>
-        </a-col>
-      </a-row>
-
     </div>
-    <div class="drawer-bootom-button">
-      <a-popconfirm title="确定放弃编辑？" @confirm="onClose" okText="确定" cancelText="取消">
-        <a-button style="margin-right: .8rem">取消</a-button>
-      </a-popconfirm>
-      <a-button @click="handleSubmit" type="primary" :loading="loading">添加购物车</a-button>
-    </div>
-  </a-drawer>
+    <br/>
+  </a-modal>
 </template>
 
 <script>
-import moment from 'moment'
 import baiduMap from '@/utils/map/baiduMap'
-import {mapState} from 'vuex'
+import moment from 'moment'
 moment.locale('zh-cn')
 function getBase64 (file) {
   return new Promise((resolve, reject) => {
@@ -90,23 +88,20 @@ function getBase64 (file) {
   })
 }
 export default {
-  name: 'drugView',
+  name: 'vehicleView',
   props: {
-    drugShow: {
+    vehicleShow: {
       type: Boolean,
       default: false
     },
-    drugData: {
+    vehicleData: {
       type: Object
     }
   },
   computed: {
-    ...mapState({
-      currentUser: state => state.account.user
-    }),
     show: {
       get: function () {
-        return this.drugShow
+        return this.vehicleShow
       },
       set: function () {
       }
@@ -118,35 +113,41 @@ export default {
       fileList: [],
       previewVisible: false,
       previewImage: '',
-      drugInfo: null,
-      pharmacyInfo: null,
-      value: 1
+      repairInfo: null,
+      reserveInfo: null,
+      durgList: [],
+      logisticsList: [],
+      userInfo: null,
+      vehicleInfo: null,
+      shopInfo: null,
+      brandInfo: null,
+      typeInfo: null
     }
   },
   watch: {
-    drugShow: function (value) {
+    vehicleShow: function (value) {
       if (value) {
-        this.selectDrugDetail()
+        this.imagesInit(this.vehicleData.images)
       }
     }
   },
   methods: {
-    local (pharmacy) {
+    local (vehicleData) {
       baiduMap.clearOverlays()
       baiduMap.rMap().enableScrollWheelZoom(true)
       // eslint-disable-next-line no-undef
-      let point = new BMap.Point(pharmacy.longitude, pharmacy.latitude)
+      let point = new BMap.Point(vehicleData.longitude, vehicleData.latitude)
       baiduMap.pointAdd(point)
       baiduMap.findPoint(point, 16)
       // let driving = new BMap.DrivingRoute(baiduMap.rMap(), {renderOptions:{map: baiduMap.rMap(), autoViewport: true}});
       // driving.search(new BMap.Point(this.nowPoint.lng,this.nowPoint.lat), new BMap.Point(scenic.point.split(",")[0],scenic.point.split(",")[1]));
     },
-    selectDrugDetail () {
-      this.$get(`/cos/commodity-info/detail/${this.drugData.id}`).then((r) => {
-        this.drugInfo = r.data.data
-        if (this.drugInfo.images !== null && this.drugInfo.images !== '') {
-          this.imagesInit(this.drugInfo.images)
-        }
+    dataInit (vehicleNo) {
+      this.$get(`/cos/vehicle-info/detail/${vehicleNo}`).then((r) => {
+        this.vehicleInfo = r.data.vehicle
+        this.shopInfo = r.data.shop
+        this.brandInfo = r.data.brand
+        this.typeInfo = r.data.type
       })
     },
     imagesInit (images) {
@@ -173,10 +174,6 @@ export default {
     },
     onClose () {
       this.$emit('close')
-    },
-    handleSubmit () {
-      this.drugData.total = this.value
-      this.$emit('success', this.drugData)
     }
   }
 }

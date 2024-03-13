@@ -62,4 +62,6 @@ public class ReserveInfo implements Serializable {
     @TableField(exist = false)
     private String vehicleNumber;
 
+    @TableField(exist = false)
+    private Integer userId;
 }

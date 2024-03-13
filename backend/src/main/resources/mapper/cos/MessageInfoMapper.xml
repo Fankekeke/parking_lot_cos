@@ -27,6 +27,9 @@
         <if test="messageInfo.name != null and messageInfo.name != ''">
             AND ui.name LIKE CONCAT('%',#{messageInfo.name},'%')
         </if>
+        <if test="messageInfo.userId != null and messageInfo.userId != ''">
+            AND ui.user_id = #{messageInfo.userId}
+        </if>
         order by
             mi.create_date desc
     </select>

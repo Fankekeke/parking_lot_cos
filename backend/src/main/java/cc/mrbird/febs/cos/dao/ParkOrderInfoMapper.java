@@ -76,8 +76,8 @@ public interface ParkOrderInfoMapper extends BaseMapper<ParkOrderInfo> {
     /**
      * 按月统计收益统计
      *
-     * @param year   年份
-     * @param month  月份
+     * @param year  年份
+     * @param month 月份
      * @return 结果
      */
     List<LinkedHashMap<String, Object>> selectPriceByMonth(@Param("year") String year, @Param("month") String month, @Param("checkDate") String date);
@@ -85,8 +85,8 @@ public interface ParkOrderInfoMapper extends BaseMapper<ParkOrderInfo> {
     /**
      * 按月统计工单统计
      *
-     * @param year   年份
-     * @param month  月份
+     * @param year  年份
+     * @param month 月份
      * @return 结果
      */
     List<LinkedHashMap<String, Object>> selectOrderNumByMonth(@Param("year") String year, @Param("month") String month, @Param("checkDate") String date);
@@ -108,4 +108,12 @@ public interface ParkOrderInfoMapper extends BaseMapper<ParkOrderInfo> {
      * @return 结果
      */
     List<LinkedHashMap<String, Object>> selectTypePriceRateByMonth(@Param("year") String year, @Param("month") String month);
+
+    /**
+     * 根据用户ID获取订单
+     *
+     * @param userId 用户ID
+     * @return 结果
+     */
+    List<ParkOrderInfo> selectOrderByUserId(@Param("userId") Integer userId);
 }

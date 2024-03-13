@@ -122,9 +122,9 @@ const formItemLayout = {
   wrapperCol: { span: 24 }
 }
 export default {
-  name: 'foodEdit',
+  name: 'orderEdit',
   props: {
-    foodEditVisiable: {
+    orderEditVisiable: {
       default: false
     }
   },
@@ -137,7 +137,7 @@ export default {
     }),
     show: {
       get: function () {
-        return this.foodEditVisiable
+        return this.orderEditVisiable
       },
       set: function () {
       }
@@ -213,18 +213,18 @@ export default {
         this.fileList = imageList
       }
     },
-    setFormValues ({...food}) {
-      this.rowId = food.id
+    setFormValues ({...order}) {
+      this.rowId = order.id
       let fields = ['address', 'name', 'recommender', 'phone', 'content', 'longitude', 'latitude']
       let obj = {}
-      Object.keys(food).forEach((key) => {
+      Object.keys(order).forEach((key) => {
         if (key === 'images') {
           this.fileList = []
-          this.imagesInit(food['images'])
+          this.imagesInit(order['images'])
         }
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)
-          obj[key] = food[key]
+          obj[key] = order[key]
         }
       })
       this.form.setFieldsValue(obj)
@@ -252,7 +252,7 @@ export default {
         values.images = images.length > 0 ? images.join(',') : null
         if (!err) {
           this.loading = true
-          this.$put('/cos/food-info', {
+          this.$put('/cos/order-info', {
             ...values
           }).then((r) => {
             this.reset()

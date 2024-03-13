@@ -34,6 +34,9 @@
         <if test="vehicleInfo.userName != null and vehicleInfo.userName != ''">
             AND ui.name LIKE CONCAT('%',#{vehicleInfo.userName},'%')
         </if>
+        <if test="vehicleInfo.userId != null and vehicleInfo.userId != ''">
+            AND ui.user_id = #{vehicleInfo.userId}
+        </if>
         order by
             vi.create_date desc
     </select>

@@ -39,6 +39,17 @@ public class UserInfoController {
      * @param id 用户ID
      * @return 结果
      */
+    @GetMapping("/detail/{userId}")
+    public R userDetail(@PathVariable("userId") Integer id) {
+        return R.ok(userInfoService.userDetail(id));
+    }
+
+    /**
+     * 用户信息详情
+     *
+     * @param id 用户ID
+     * @return 结果
+     */
     @GetMapping("/{id}")
     public R detail(@PathVariable("id") Integer id) {
         return R.ok(userInfoService.getById(id));

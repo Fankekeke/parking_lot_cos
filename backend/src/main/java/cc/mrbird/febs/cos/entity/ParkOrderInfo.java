@@ -40,6 +40,11 @@ public class ParkOrderInfo implements Serializable {
     private Integer vehicleId;
 
     /**
+     * 订单编号
+     */
+    private String code;
+
+    /**
      * 开始停车时间
      */
     private String startDate;
@@ -78,4 +83,6 @@ public class ParkOrderInfo implements Serializable {
     @TableField(exist = false)
     private String vehicleNumber;
 
+    @TableField(exist = false)
+    private Integer userId;
 }
