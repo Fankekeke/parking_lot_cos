@@ -1,6 +1,9 @@
 <template>
   <a-modal v-model="show" title="订单详情" @cancel="onClose" :width="1000">
     <template slot="footer">
+      <a-button key="over" @click="overOrder" :loading="loading">
+        结算
+      </a-button>
       <a-button key="back" @click="onClose" type="danger">
         关闭
       </a-button>
@@ -140,6 +143,15 @@ export default {
     }
   },
   methods: {
+    overOrder (row) {
+      this.loading = true
+      this.$get(`/cos/park-order-info/order/over`, {
+        orderCode: this.orderData.code
+      }).then((r) => {
+        this.loading = false
+        this.$emit('success')
+      })
+    },
     local (orderData) {
       baiduMap.clearOverlays()
       baiduMap.rMap().enableScrollWheelZoom(true)

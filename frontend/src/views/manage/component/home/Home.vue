@@ -282,8 +282,8 @@ export default {
         this.$emit('setTitle', titleData)
         this.titleData.incomeMonth = r.data.incomeMonth
         this.titleData.workOrderMonth = r.data.workOrderMonth
-        this.titleData.completedWorkOrder = r.data.completedWorkOrder
-        this.titleData.completedRepairOrder = r.data.completedRepairOrder
+        this.titleData.incomeYear = r.data.incomeYear
+        this.titleData.workOrderYear = r.data.workOrderYear
         this.bulletinList = r.data.bulletin
         let values = []
         if (r.data.orderRecord !== null && r.data.orderRecord.length !== 0) {

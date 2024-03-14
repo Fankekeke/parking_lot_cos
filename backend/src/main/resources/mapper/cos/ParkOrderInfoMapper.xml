@@ -7,6 +7,8 @@
         select
             poi.id,
             poi.code,
+            poi.content,
+            poi.status,
             poi.space_id,
             poi.vehicle_id,
             poi.start_date,
@@ -62,6 +64,7 @@
                 DATE_FORMAT( pr.pay_date, '%Y%m' ) = DATE_FORMAT(
                     CURDATE(),
                     '%Y%m')
+        AND pr.status = '1'
     </select>
 
     <!-- 本月工单 -->
@@ -86,6 +89,7 @@
                 DATE_FORMAT( pr.pay_date, '%Y' ) = DATE_FORMAT(
                     CURDATE(),
                     '%Y')
+        AND pr.status = '1'
     </select>
 
     <!-- 本年工单 -->
@@ -106,6 +110,7 @@
             IFNULL(SUM(pr.total_price), 0)
         FROM
             park_order_info pr
+        WHERE pr.status = '1'
     </select>
 
     <!-- 查询十天内缴费统计 -->
@@ -136,7 +141,9 @@
                 SELECT
                     DATE_SUB( curdate(), INTERVAL + 9 DAY )) spo
                 LEFT JOIN park_order_info pr ON (
-                    DATE_FORMAT( pr.pay_date, '%Y-%m-%d' ) = DATE_FORMAT( spo.days, '%Y-%m-%d' ))
+                    DATE_FORMAT( pr.pay_date, '%Y-%m-%d' ) = DATE_FORMAT( spo.days, '%Y-%m-%d' )
+                    AND pr.status = '1'
+                )
         GROUP BY
             days
         ORDER BY
@@ -171,7 +178,9 @@
             SELECT
             DATE_SUB( curdate(), INTERVAL + 9 DAY )) spo
             LEFT JOIN park_order_info oi ON (
-            DATE_FORMAT( oi.pay_date, '%Y-%m-%d' ) = DATE_FORMAT( spo.days, '%Y-%m-%d' ))
+            DATE_FORMAT( oi.pay_date, '%Y-%m-%d' ) = DATE_FORMAT( spo.days, '%Y-%m-%d' )
+            AND oi.status = '1'
+            )
         GROUP BY
             days
         ORDER BY
@@ -194,6 +203,7 @@
         <if test="month != null and month != ''">
             AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
         </if>
+        AND oi.status = '1'
         )
         where
         1 = 1
@@ -217,6 +227,7 @@
         <if test="month != null and month != ''">
             AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
         </if>
+        AND oi.status = '1'
         )
         where
         1 = 1
@@ -294,6 +305,7 @@
         <if test="month != null and month != ''">
             AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
         </if>
+        AND oi.status = '1'
         )
         where
         1 = 1
@@ -371,6 +383,7 @@
         <if test="month != null and month != ''">
             AND DATE_FORMAT(oi.pay_date, '%c') = #{month}
         </if>
+        AND oi.status = '1'
         )
         where
         1 = 1

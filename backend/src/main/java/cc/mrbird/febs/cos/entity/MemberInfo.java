@@ -65,4 +65,7 @@ public class MemberInfo implements Serializable {
     @TableField(exist = false)
     private String name;
 
+    @TableField(exist = false)
+    private String ruleName;
+
 }

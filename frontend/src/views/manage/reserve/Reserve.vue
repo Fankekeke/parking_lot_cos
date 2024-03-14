@@ -53,6 +53,7 @@
                :scroll="{ x: 900 }"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
+          <a-icon type="plus-square" theme="twoTone" @click="checkOrder(record)" title="入 库" v-if="record.status == 1"></a-icon>
           <a-icon type="file-search" @click="reserveViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
@@ -62,19 +63,26 @@
       :reserveShow="reserveView.visiable"
       :reserveData="reserveView.data">
     </reserve-view>
+    <order-add
+      ref="orderEdit"
+      @close="handleorderEditClose"
+      @success="handleorderEditSuccess"
+      :orderAddVisiable="orderEdit.visiable">
+    </order-add>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
 import reserveView from './ReserveView.vue'
+import orderAdd from './OrderAdd.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
   name: 'reserve',
-  components: {reserveView, RangeDate},
+  components: {reserveView, orderAdd, RangeDate},
   data () {
     return {
       advanced: false,
@@ -87,6 +95,9 @@ export default {
       reserveView: {
         visiable: false,
         data: null
+      },
+      orderEdit: {
+        visiable: false
       },
       queryParams: {},
       filteredInfo: null,
@@ -154,6 +165,16 @@ export default {
           }
         }
       }, {
+        title: '车位名称',
+        dataIndex: 'spaceName',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
+        }
+      }, {
         title: '预约状态',
         dataIndex: 'status',
         customRender: (text, row, index) => {
@@ -197,6 +218,18 @@ export default {
     this.fetch()
   },
   methods: {
+    checkOrder (record) {
+      this.$refs.orderEdit.setFormValues(record)
+      this.orderEdit.visiable = true
+    },
+    handleorderEditClose () {
+      this.orderEdit.visiable = false
+    },
+    handleorderEditSuccess () {
+      this.orderEdit.visiable = false
+      this.$message.success('修改订单成功')
+      this.search()
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },

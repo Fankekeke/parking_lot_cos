@@ -53,7 +53,8 @@
                :scroll="{ x: 900 }"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
+          <a-icon v-if="record.status == 0" type="alipay" @click="pay(record)" title="支 付"></a-icon>
+          <a-icon type="control" theme="twoTone" @click="download(record)" title="下 载" style="margin-left: 15px" v-if="record.status == 1"></a-icon>
           <a-icon type="file-search" @click="orderViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
@@ -202,6 +203,19 @@ export default {
           }
         }
       }, {
+        title: '缴费状态',
+        dataIndex: 'status',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '0':
+              return <a-tag color="red">未缴费</a-tag>
+            case '1':
+              return <a-tag color="green">已缴费</a-tag>
+            default:
+              return '- -'
+          }
+        }
+      }, {
         title: '操作',
         dataIndex: 'operation',
         scopedSlots: {customRender: 'operation'}
@@ -212,6 +226,48 @@ export default {
     this.fetch()
   },
   methods: {
+    download (row) {
+      this.$message.loading('正在生成', 0)
+      let spread = newSpread('textTable')
+      let sheet = spread.getActiveSheet()
+      sheet.suspendPaint()
+      sheet.setValue(1, 2, row.name)
+      sheet.setValue(1, 4, row.payDate)
+      sheet.setValue(4, 2, row.spaceName)
+      sheet.setValue(4, 3, row.totalTime)
+      sheet.setValue(4, 4, row.price + ' 元')
+      sheet.setValue(5, 4, row.totalPrice + ' 元')
+      sheet.setValue(7, 1, row.content)
+      spread = fixedForm(spread, 'textTable', { title: `${row.payDate}缴费表` })
+      saveExcel(spread, `${row.payDate}缴费表.xlsx`)
+      this.$message.destroy()
+    },
+    pay (row) {
+      let data = { outTradeNo: row.code, subject: `${row.spaceName}`, totalAmount: row.totalPrice, body: '' }
+      this.$post('/cos/pay/alipay', data).then((r) => {
+        // console.log(r.data.msg)
+        // 添加之前先删除一下，如果单页面，页面不刷新，添加进去的内容会一直保留在页面中，二次调用form表单会出错
+        const divForm = document.getElementsByTagName('div')
+        if (divForm.length) {
+          document.body.removeChild(divForm[0])
+        }
+        const div = document.createElement('div')
+        div.innerHTML = r.data.msg // data就是接口返回的form 表单字符串
+        // console.log(div.innerHTML)
+        document.body.appendChild(div)
+        document.forms[0].setAttribute('target', '_self') // 新开窗口跳转
+        document.forms[0].submit()
+      })
+    },
+    overOrder (row) {
+      this.$get(`/cos/park-order-info/order/over`, {
+        orderCode: row.code,
+        userId: this.currentUser.userId
+      }).then((r) => {
+        this.$message.success('订单结算成功')
+        this.search()
+      })
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },

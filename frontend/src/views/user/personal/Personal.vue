@@ -150,7 +150,7 @@ export default {
       let listData = []
       this.courseInfo.forEach(item => {
         if ((moment(value).format('YYYY-MM-DD')) === (moment(item.payDate).format('YYYY-MM-DD'))) {
-          listData.push({type: 'success', content: item.code})
+          listData.push({type: 'success', content: '✔'})
         }
       })
       return listData || []

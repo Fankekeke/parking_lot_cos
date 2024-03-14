@@ -61,6 +61,16 @@ public class SpaceInfoController {
     }
 
     /**
+     * 查询空闲停车位
+     *
+     * @return 结果
+     */
+    @GetMapping("/selectFreeSpace/list")
+    public R selectFreeSpace() {
+        return R.ok(spaceInfoService.selectFreeSpace());
+    }
+
+    /**
      * 新增车位信息
      *
      * @param spaceInfo 车位信息

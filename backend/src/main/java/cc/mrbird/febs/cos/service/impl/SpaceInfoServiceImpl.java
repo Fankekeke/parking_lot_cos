@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author Fank gmail - fan1ke2ke@gmail.com
@@ -26,5 +27,15 @@ public class SpaceInfoServiceImpl extends ServiceImpl<SpaceInfoMapper, SpaceInfo
     @Override
     public IPage<LinkedHashMap<String, Object>> selectSpacePage(Page<SpaceInfo> page, SpaceInfo spaceInfo) {
         return baseMapper.selectSpacePage(page, spaceInfo);
+    }
+
+    /**
+     * 查询空闲停车位
+     *
+     * @return 结果
+     */
+    @Override
+    public List<SpaceInfo> selectFreeSpace() {
+        return baseMapper.selectFreeSpace();
     }
 }

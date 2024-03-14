@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="新增美食推荐"
+    title="新增订单"
     :maskClosable="false"
     width=800
     placement="right"
@@ -11,84 +11,30 @@
     <a-form :form="form" layout="vertical">
       <a-row :gutter="20">
         <a-col :span="12">
-          <a-form-item label='店铺名称' v-bind="formItemLayout">
-            <a-input v-decorator="[
-            'name',
-            { rules: [{ required: true, message: '请输入店铺名称!' }] }
-            ]"/>
+          <a-form-item label='选择车位' v-bind="formItemLayout">
+            <a-select v-decorator="[
+              'spaceId',
+              { rules: [{ required: true, message: '请输入所属车位!' }] }
+              ]">
+              <a-select-option :value="item.id" v-for="(item, index) in spaceList" :key="index">{{ item.name }}</a-select-option>
+            </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item label='店铺地址'>
-            <a-input-search
-              v-decorator="[
-              'address'
-              ]"
-              enter-button="选择"
-              @search="showChildrenDrawer"
-            />
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='经度' v-bind="formItemLayout">
-            <a-input v-decorator="[
-            'longitude',
-            { rules: [{ required: true, message: '请输入经度!' }] }
-            ]"/>
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='纬度' v-bind="formItemLayout">
-            <a-input v-decorator="[
-            'latitude',
-            { rules: [{ required: true, message: '请输入纬度!' }] }
-            ]"/>
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='推荐人' v-bind="formItemLayout">
-            <a-input v-decorator="[
-            'recommender',
-            { rules: [{ required: true, message: '请输入推荐人!' }] }
-            ]"/>
-          </a-form-item>
-        </a-col>
-        <a-col :span="12">
-          <a-form-item label='联系方式' v-bind="formItemLayout">
-            <a-input v-decorator="[
-            'phone',
-            { rules: [{ required: true, message: '请输入联系方式!' }] }
-            ]"/>
+          <a-form-item label='选择车辆' v-bind="formItemLayout">
+            <a-select v-decorator="[
+              'vehicleId',
+              { rules: [{ required: true, message: '请输入所属车辆!' }] }
+              ]">
+              <a-select-option :value="item.id" v-for="(item, index) in vehicleList" :key="index">{{ item.vehicleNumber }}</a-select-option>
+            </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item label='推荐内容' v-bind="formItemLayout">
+          <a-form-item label='备注' v-bind="formItemLayout">
             <a-textarea :rows="6" v-decorator="[
-            'content',
-             { rules: [{ required: true, message: '请输入推荐内容!' }] }
+            'content'
             ]"/>
-          </a-form-item>
-        </a-col>
-        <a-col :span="24">
-          <a-form-item label='图册' v-bind="formItemLayout">
-            <a-upload
-              name="avatar"
-              action="http://127.0.0.1:9527/file/fileUpload/"
-              list-type="picture-card"
-              :file-list="fileList"
-              @preview="handlePreview"
-              @change="picHandleChange"
-            >
-              <div v-if="fileList.length < 8">
-                <a-icon type="plus" />
-                <div class="ant-upload-text">
-                  Upload
-                </div>
-              </div>
-            </a-upload>
-            <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
-              <img alt="example" style="width: 100%" :src="previewImage" />
-            </a-modal>
           </a-form-item>
         </a-col>
       </a-row>
@@ -149,6 +95,8 @@ export default {
       form: this.$form.createForm(this),
       loading: false,
       fileList: [],
+      spaceList: [],
+      vehicleList: [],
       previewVisible: false,
       previewImage: '',
       localPoint: {},
@@ -156,7 +104,21 @@ export default {
       childrenDrawer: false
     }
   },
+  mounted () {
+    this.selectVehicle()
+    this.selectSpace()
+  },
   methods: {
+    selectVehicle () {
+      this.$get(`/cos/vehicle-info/list`).then((r) => {
+        this.vehicleList = r.data.data
+      })
+    },
+    selectSpace () {
+      this.$get(`/cos/space-info/selectFreeSpace/list`).then((r) => {
+        this.spaceList = r.data.data
+      })
+    },
     handlerClosed (localPoint) {
       this.childrenDrawer = false
       if (localPoint !== null && localPoint !== undefined) {
@@ -221,7 +183,7 @@ export default {
         values.images = images.length > 0 ? images.join(',') : null
         if (!err) {
           this.loading = true
-          this.$post('/cos/order-info', {
+          this.$post('/cos/park-order-info', {
             ...values
           }).then((r) => {
             this.reset()

@@ -74,6 +74,16 @@ public class ParkOrderInfo implements Serializable {
      */
     private String payDate;
 
+    /**
+     * 支付状态（0.未支付 1.已支付）
+     */
+    private String status;
+
+    /**
+     * 备注
+     */
+    private String content;
+
     @TableField(exist = false)
     private String spaceName;
 

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author Fank gmail - fan1ke2ke@gmail.com
@@ -21,4 +22,11 @@ public interface SpaceInfoMapper extends BaseMapper<SpaceInfo> {
      * @return 结果
      */
     IPage<LinkedHashMap<String, Object>> selectSpacePage(Page<SpaceInfo> page, @Param("spaceInfo") SpaceInfo spaceInfo);
+
+    /**
+     * 查询空闲停车位
+     *
+     * @return 结果
+     */
+    List<SpaceInfo> selectFreeSpace();
 }

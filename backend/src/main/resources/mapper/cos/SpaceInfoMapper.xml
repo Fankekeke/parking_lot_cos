@@ -23,4 +23,23 @@
         </if>
         order by create_date desc
     </select>
+
+    <!-- 查询空闲停车位 -->
+    <select id="selectFreeSpace" resultType="cc.mrbird.febs.cos.entity.SpaceInfo">
+        select
+        si.id,
+        si.code,
+        si.name,
+        si.`space`,
+        si.create_date,
+        si.images,
+        si.price
+        from
+        space_info si
+        left join space_status_info ssi on
+        (ssi.space_id = si.id)
+        where 1 = 1
+        and ssi.status = '0'
+        order by create_date desc
+    </select>
 </mapper>

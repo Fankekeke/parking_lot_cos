@@ -154,6 +154,16 @@ export default {
           }
         }
       }, {
+        title: '车位名称',
+        dataIndex: 'spaceName',
+        customRender: (text, row, index) => {
+          if (text !== null) {
+            return text
+          } else {
+            return '- -'
+          }
+        }
+      }, {
         title: '预约状态',
         dataIndex: 'status',
         customRender: (text, row, index) => {

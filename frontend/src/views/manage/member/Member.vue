@@ -140,16 +140,9 @@ export default {
         }
       }, {
         title: '会员等级',
-        dataIndex: 'memberLevel',
+        dataIndex: 'ruleName',
         customRender: (text, row, index) => {
-          switch (text) {
-            case '1':
-              return <a-tag>月会员</a-tag>
-            case '2':
-              return <a-tag>年会员</a-tag>
-            default:
-              return '- -'
-          }
+          return text
         }
       }, {
         title: '会员开始时间',

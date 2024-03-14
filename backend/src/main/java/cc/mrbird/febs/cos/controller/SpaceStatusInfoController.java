@@ -2,13 +2,20 @@ package cc.mrbird.febs.cos.controller;
 
 
 import cc.mrbird.febs.common.utils.R;
-import cc.mrbird.febs.cos.entity.SpaceStatusInfo;
-import cc.mrbird.febs.cos.service.ISpaceStatusInfoService;
+import cc.mrbird.febs.cos.entity.*;
+import cc.mrbird.febs.cos.service.*;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,6 +27,18 @@ import java.util.List;
 public class SpaceStatusInfoController {
 
     private final ISpaceStatusInfoService spaceStatusInfoService;
+
+    private final IReserveInfoService reserveInfoService;
+
+    private final IMailService mailService;
+
+    private final TemplateEngine templateEngine;
+
+    private final IMessageInfoService messageInfoService;
+
+    private final IVehicleInfoService vehicleInfoService;
+
+    private final IUserInfoService userInfoService;
 
     /**
      * 分页获取车位状态信息
@@ -95,5 +114,41 @@ public class SpaceStatusInfoController {
     @DeleteMapping("/{ids}")
     public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
         return R.ok(spaceStatusInfoService.removeByIds(ids));
+    }
+
+    /**
+     * 定时任务30秒执行 车辆状态更新
+     */
+    @Scheduled(fixedRate = 30000)
+    public void scheduledVehicleStatusTask() {
+        // 获取当前车位预约状态
+        List<ReserveInfo> reserveInfos = reserveInfoService.list(Wrappers.<ReserveInfo>lambdaQuery().eq(ReserveInfo::getStatus,"1"));
+        System.out.println("======== 车辆状态更新");
+        for (ReserveInfo reserveInfo : reserveInfos) {
+            if (!DateUtil.isIn(new Date(), DateUtil.parseDateTime(reserveInfo.getStartDate()), DateUtil.parseDateTime(reserveInfo.getEndDate()))) {
+                spaceStatusInfoService.update(Wrappers.<SpaceStatusInfo>lambdaUpdate().set(SpaceStatusInfo::getStatus, 0).eq(SpaceStatusInfo::getId, reserveInfo.getSpaceId()));
+                reserveInfo.setStatus("0");
+                reserveInfoService.updateById(reserveInfo);
+
+                // 车辆信息
+                VehicleInfo vehicleInfo = vehicleInfoService.getById(reserveInfo.getVehicleId());
+
+                // 用户信息
+                UserInfo userInfo = userInfoService.getOne(Wrappers.<UserInfo>lambdaQuery().eq(UserInfo::getId, vehicleInfo.getUserId()));
+                // 发送消息
+                MessageInfo messageInfo = new MessageInfo();
+                messageInfo.setUserId(userInfo.getId());
+                messageInfo.setContent("您好，您的"+vehicleInfo.getVehicleNumber()+"超过30分钟预定车位失效");
+                messageInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
+                messageInfoService.save(messageInfo);
+                if (StrUtil.isNotEmpty(userInfo.getEmail())) {
+                    Context context = new Context();
+                    context.setVariable("today", DateUtil.formatDate(new Date()));
+                    context.setVariable("custom", userInfo.getName() + " 您好，您的"+vehicleInfo.getVehicleNumber()+"超过30分钟预定车位失效");
+                    String emailContent = templateEngine.process("registerEmail", context);
+                    mailService.sendHtmlMail(userInfo.getEmail(), DateUtil.formatDate(new Date()) + "预定提示", emailContent);
+                }
+            }
+        }
     }
 }

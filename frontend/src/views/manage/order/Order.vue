@@ -53,7 +53,8 @@
                :scroll="{ x: 900 }"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
+          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="orderOverViewOpen(record)" title="订单结算" v-if="record.endDate == null"></a-icon>
+          <a-icon type="control" theme="twoTone" @click="download(record)" title="下 载" style="margin-left: 15px" v-if="record.status == 1"></a-icon>
           <a-icon type="file-search" @click="orderViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
@@ -70,6 +71,12 @@
       @success="handleorderEditSuccess"
       :orderEditVisiable="orderEdit.visiable">
     </order-edit>
+    <order-over
+      @close="handleorderOverViewClose"
+      @success="handleorderOverSuccess"
+      :orderShow="orderOverView.visiable"
+      :orderData="orderOverView.data">
+    </order-over>
     <order-view
       @close="handleorderViewClose"
       :orderShow="orderView.visiable"
@@ -83,13 +90,15 @@ import RangeDate from '@/components/datetime/RangeDate'
 import orderAdd from './OrderAdd.vue'
 import orderEdit from './OrderEdit.vue'
 import orderView from './OrderView.vue'
+import orderOver from './OrderOver.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
+import { newSpread, fixedForm, saveExcel } from '@/utils/spreadJS'
 moment.locale('zh-cn')
 
 export default {
   name: 'order',
-  components: {orderAdd, orderEdit, orderView, RangeDate},
+  components: {orderAdd, orderEdit, orderView, orderOver, RangeDate},
   data () {
     return {
       advanced: false,
@@ -98,6 +107,10 @@ export default {
       },
       orderEdit: {
         visiable: false
+      },
+      orderOverView: {
+        visiable: false,
+        data: null
       },
       orderView: {
         visiable: false,
@@ -202,6 +215,19 @@ export default {
           }
         }
       }, {
+        title: '缴费状态',
+        dataIndex: 'status',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '0':
+              return <a-tag color="red">未缴费</a-tag>
+            case '1':
+              return <a-tag color="green">已缴费</a-tag>
+            default:
+              return '- -'
+          }
+        }
+      }, {
         title: '操作',
         dataIndex: 'operation',
         scopedSlots: {customRender: 'operation'}
@@ -212,6 +238,22 @@ export default {
     this.fetch()
   },
   methods: {
+    download (row) {
+      this.$message.loading('正在生成', 0)
+      let spread = newSpread('textTable')
+      let sheet = spread.getActiveSheet()
+      sheet.suspendPaint()
+      sheet.setValue(1, 2, row.name)
+      sheet.setValue(1, 4, row.payDate)
+      sheet.setValue(4, 2, row.spaceName)
+      sheet.setValue(4, 3, row.totalTime)
+      sheet.setValue(4, 4, row.price + ' 元')
+      sheet.setValue(5, 4, row.totalPrice + ' 元')
+      sheet.setValue(7, 1, row.content)
+      spread = fixedForm(spread, 'textTable', { title: `${row.payDate}缴费表` })
+      saveExcel(spread, `${row.payDate}缴费表.xlsx`)
+      this.$message.destroy()
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -236,6 +278,18 @@ export default {
     orderViewOpen (row) {
       this.orderView.data = row
       this.orderView.visiable = true
+    },
+    handleorderOverSuccess () {
+      this.orderOverView.visiable = false
+      this.$message.success('订单结算成功')
+      this.search()
+    },
+    handleorderOverViewClose () {
+      this.orderOverView.visiable = false
+    },
+    orderOverViewOpen (row) {
+      this.orderOverView.data = row
+      this.orderOverView.visiable = true
     },
     handleorderViewClose () {
       this.orderView.visiable = false
