@@ -86,6 +86,7 @@ import orderEdit from './OrderEdit.vue'
 import orderView from './OrderView.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
+import { newSpread, fixedForm, saveExcel } from '@/utils/spreadJS'
 moment.locale('zh-cn')
 
 export default {
