@@ -38,7 +38,7 @@
         </a-col>
       </a-card>
     </a-row>
-    <home v-if="user.roleId == 74" @setTitle="setTitleData"></home>
+    <home v-if="user.roleId == 74 || user.roleId == 76" @setTitle="setTitleData"></home>
     <work v-if="user.roleId == 75"></work>
     <a-row :gutter="8" class="count-info" style="margin-top: 15px" v-show="user.roleId == 74">
       <a-col :span="12" class="visit-count-wrapper">
