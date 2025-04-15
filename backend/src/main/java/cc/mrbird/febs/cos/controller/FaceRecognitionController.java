@@ -2,9 +2,9 @@ package cc.mrbird.febs.cos.controller;
 
 import cc.mrbird.febs.common.utils.FileUtil;
 import cc.mrbird.febs.common.utils.R;
-import cc.mrbird.febs.cos.entity.OwnerInfo;
+import cc.mrbird.febs.cos.entity.UserInfo;
 import cc.mrbird.febs.cos.service.FaceRecognition;
-import cc.mrbird.febs.cos.service.IOwnerInfoService;
+import cc.mrbird.febs.cos.service.IUserInfoService;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class FaceRecognitionController {
 
     private final FaceRecognition faceRecognition;
 
-    private final IOwnerInfoService ownerInfoService;
+    private final IUserInfoService ownerInfoService;
 
 
     /**
@@ -48,10 +48,10 @@ public class FaceRecognitionController {
         String base64EncoderImg = base64Encoder.encode(file.getBytes());
         String result = faceRecognition.registered(base64EncoderImg, name);
         if ("success".equals(result)) {
-            String localPath="E:/Project/小区物业管理系统/db";
+            String localPath="G:/Project/停车场管理系统/db";
             String fileName=file.getOriginalFilename();
             String newFileName = FileUtil.upload(file, localPath, fileName);
-            ownerInfoService.update(Wrappers.<OwnerInfo>lambdaUpdate().set(OwnerInfo::getImages, newFileName).eq(OwnerInfo::getId, ownerId));
+            ownerInfoService.update(Wrappers.<UserInfo>lambdaUpdate().set(UserInfo::getUserImages, newFileName).eq(UserInfo::getId, ownerId));
         }
         return R.ok(result);
     }

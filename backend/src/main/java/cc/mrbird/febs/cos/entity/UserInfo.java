@@ -41,6 +41,7 @@ public class UserInfo implements Serializable {
      * 头像
      */
     private String images;
+    private String userImages;
 
     /**
      * 性别 1.男 2.女

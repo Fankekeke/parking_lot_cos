@@ -45,10 +45,40 @@
                :scroll="{ x: 900 }"
                @change="handleTableChange">
         <template slot="operation" slot-scope="text, record">
+          <a-icon type="picture" v-if="record.userImages === null" @click="face(record)" title="照 片" style="margin-right: 15px"></a-icon>
           <a-icon type="file-search" @click="userViewOpen(record)" title="详 情" style="margin-left: 15px"></a-icon>
         </template>
       </a-table>
     </div>
+    <a-modal v-model="faceView.visiable" title="上传人脸照片">
+      <template slot="footer">
+        <a-button key="back" @click="faceView.visiable = false">
+          取消
+        </a-button>
+      </template>
+      <div style="height: 120px">
+        <a-upload
+          v-if="faceView.visiable"
+          name="avatar"
+          action="http://127.0.0.1:9527/cos/face/registered/"
+          list-type="picture-card"
+          :data="{'name': faceView.data.name, 'ownerId': faceView.data.id}"
+          :file-list="fileList"
+          @preview="handlePreview"
+          @change="picHandleChange"
+        >
+          <div v-if="fileList.length < 1">
+            <a-icon type="plus" />
+            <div class="ant-upload-text">
+              Upload
+            </div>
+          </div>
+        </a-upload>
+      </div>
+      <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
+        <img alt="example" style="width: 100%" :src="previewImage" />
+      </a-modal>
+    </a-modal>
     <user-view
       @close="handleuserViewClose"
       :userShow="userView.visiable"
@@ -63,12 +93,23 @@ import userView from './UserView.vue'
 import {mapState} from 'vuex'
 import moment from 'moment'
 moment.locale('zh-cn')
-
+function getBase64 (file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = error => reject(error)
+  })
+}
 export default {
   name: 'user',
   components: {userView, RangeDate},
   data () {
     return {
+      faceView: {
+        visiable: false,
+        data: null
+      },
       advanced: false,
       userAdd: {
         visiable: false
@@ -189,6 +230,34 @@ export default {
     this.fetch()
   },
   methods: {
+    handleCancel () {
+      this.previewVisible = false
+    },
+    async handlePreview (file) {
+      if (!file.url && !file.preview) {
+        file.preview = await getBase64(file.originFileObj)
+      }
+      this.previewImage = file.url || file.preview
+      this.previewVisible = true
+    },
+    picHandleChange (info) {
+      console.log(info.file.response)
+      if (info.file.response !== undefined && info.file.response.msg !== undefined) {
+        if (info.file.response.msg === 'success') {
+          this.$message.success('添加照片成功')
+          this.faceView.visiable = false
+          this.fetch()
+        } else {
+          this.$message.error(info.file.response.msg)
+        }
+      }
+      this.fileList = info.fileList
+    },
+    face (row) {
+      this.fileList = []
+      this.faceView.visiable = true
+      this.faceView.data = row
+    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },

@@ -9,6 +9,7 @@
             code,
             name,
             images,
+            user_images,
             sex,
             create_date,
             phone,
