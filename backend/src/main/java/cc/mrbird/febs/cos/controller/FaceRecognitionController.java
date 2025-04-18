@@ -63,7 +63,7 @@ public class FaceRecognitionController {
      * @return
      */
     @PostMapping("/verification")
-    public R verification(@RequestParam("file") String file, @RequestParam("name") String name) throws IOException {
+    public R verification(@RequestParam("file") String file) throws IOException {
 //        BASE64Encoder base64Encoder =new BASE64Encoder();
 //        String base64EncoderImg = base64Encoder.encode(file.getBytes());
 
@@ -71,11 +71,7 @@ public class FaceRecognitionController {
         if ("error".equals(result)) {
             return R.ok("人脸识别未通过！");
         } else {
-            if (name.equals(result)) {
-                return R.ok("成功");
-            } else {
-                return R.ok("人脸不匹配！");
-            }
+            return R.ok("成功");
         }
     }
 

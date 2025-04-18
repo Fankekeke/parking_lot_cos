@@ -99,7 +99,7 @@
                 </div>
               </div>
             </a-col>
-            <a-col :span="12">
+            <a-col :span="24" v-if="faceVerification">
               <a-form-item label='车辆信息' v-bind="formItemLayout">
                 <a-radio-group button-style="solid" v-decorator="[
                     'vehicleId',
@@ -164,6 +164,7 @@ export default {
   },
   methods: {
     getCompetence () {
+      this.userInfo == undefined
       var _this = this
       this.thisCancas = document.getElementById('canvasCamera')
       this.thisContext = this.thisCancas.getContext('2d')
@@ -221,6 +222,7 @@ export default {
           setTimeout(() => {
             this.faceVerification = true
             this.faceView.visiable = false
+            this.thisVideo.srcObject.getTracks()[0].stop()
           })
         }
       })
@@ -262,6 +264,8 @@ export default {
     },
     handleCancel (e) {
       console.log('Clicked cancel button')
+      this.faceVerification = false
+      this.thisVideo.srcObject.getTracks()[0].stop()
       this.visible = false
     },
     selectVehicleByUserId () {
