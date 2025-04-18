@@ -131,6 +131,7 @@ export default {
     return {
       form: this.$form.createForm(this),
       formItemLayout,
+      faceCheck: false,
       visible: false,
       statusList: [],
       vehicleList: [],
