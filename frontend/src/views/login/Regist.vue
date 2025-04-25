@@ -9,6 +9,15 @@
           <a-input type="text" v-model="clientName" placeholder="客户名称"></a-input>
         </a-form-item>
         <a-form-item
+          :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入邮箱地址' }]}">
+          <a-input-search :disabled="emailFlag" placeholder="邮箱地址" :enter-button="enterText" @search="onCheck" />
+        </a-form-item>
+        <a-form-item
+          fieldDecoratorId="verificationCode"
+          :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入验证码' }]}">
+          <a-input-search :disabled="emailFlag" placeholder="验证码" enter-button="验证" @search="verificationCheck" />
+        </a-form-item>
+        <a-form-item
           fieldDecoratorId="email"
           :fieldDecoratorOptions="{rules: [{ required: true, message: '请输入注册账号' },  { validator: this.handleUsernameCheck }], validateTrigger: ['change', 'blur']}">
           <a-input type="text" v-model="username" placeholder="账号"></a-input>
@@ -77,6 +86,12 @@ export default {
   components: {},
   data () {
     return {
+      emailFlag: false,
+      sendFlag: false,
+      enterText: '发送',
+      name: '',
+      email: '',
+      verificationCode: '',
       form: null,
       clientName: '',
       username: '',
@@ -104,6 +119,54 @@ export default {
     }
   },
   methods: {
+    onCheck (data) {
+      this.isEmail(data)
+    },
+    verificationCheck (data) {
+      if (data === '') {
+        this.$message.warning('请填写验证码！')
+        return false
+      }
+      if (!this.sendFlag) {
+        this.$message.warning('请填写邮箱获取验证码！')
+        return false
+      }
+      this.$get('/cos/user-info/verification/check', {
+        validateCode: data,
+        email: this.email
+      }).then((r) => {
+        if (r.data.data) {
+          this.emailFlag = true
+          this.$message.success('验证成功！')
+        } else {
+          this.$message.error('验证失败！')
+        }
+      })
+    },
+    isEmail (data) {
+      var reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+      if (data === '') {
+        this.$message.warning('请填写邮箱地址！')
+        return false
+      } else if (!reg.test(data)) {
+        this.$message.warning('验证不通过！')
+        return false
+      } else {
+        this.enterText = '发送中..'
+        this.$get('/cos/user-info/register/email', {
+          email: data
+        }).then((r) => {
+          if (r.data.data) {
+            this.email = data
+            this.sendFlag = true
+            this.$message.success('发送成功！')
+          } else {
+            this.$message.warning('改邮箱地址已存在！')
+          }
+          this.enterText = '发送'
+        })
+      }
+    },
     isMobile () {
       return this.$store.state.setting.isMobile
     },
@@ -184,6 +247,10 @@ export default {
 
     handleSubmit () {
       this.form.validateFields((err, values) => {
+        if (!this.emailFlag) {
+          this.$message.error('请先通过邮箱验证！')
+          return false
+        }
         if (!err) {
           this.$post('regist', {
             username: this.username,
