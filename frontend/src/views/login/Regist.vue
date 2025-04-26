@@ -161,7 +161,7 @@ export default {
             this.sendFlag = true
             this.$message.success('发送成功！')
           } else {
-            this.$message.warning('改邮箱地址已存在！')
+            this.$message.warning('此邮箱地址已存在！')
           }
           this.enterText = '发送'
         })
@@ -255,7 +255,8 @@ export default {
           this.$post('regist', {
             username: this.username,
             password: this.password,
-            name: this.clientName
+            name: this.clientName,
+            email: this.email
           }).then(() => {
             this.$message.success('注册成功')
             this.returnLogin()

@@ -3,10 +3,10 @@ server:
 
 baidu:
   face:
-    app-name: property_face
-    app-id:  25798253
-    app-key: 8FH4xcAgXOyeTbC0kUUtCipE
-    secret-key: CK9FcAOXyl3SoAASg2yeXANSekTDVnUu
+    app-name: park_order
+    app-id:  118519889
+    app-key: r991Wv4TJTAlP46BBbi6S0zN
+    secret-key: 7JNJE564KuLdb7kuh4rYPlHewOaihfV7
 
 spring:
   mail:
@@ -106,6 +106,6 @@ febs:
         num: 1000
   shiro:
     # 后端免认证接口 url
-    anonUrl: /login,/logout/**,/regist,/user/check/**,/file/**,/api/**,/imagesWeb/**
+    anonUrl: /login,/logout/**,/regist,/user/check/**,/file/**,/api/**,/imagesWeb/**,/cos/face/**,/cos/user-info/**
     # token有效期，单位秒
     jwtTimeOut: 3600

@@ -27,9 +27,18 @@
           </a-button>
         </a-form-item>
         <div>
+          <a style="float: left" @click="visible = true">忘记密码</a>
           <a style="float: right" @click="regist">注册账户</a>
         </div>
       </a-form>
+      <a-modal
+        title="找回密码"
+        :visible="visible"
+        :confirm-loading="confirmLoading"
+        @ok="handleOk"
+        @cancel="visible = false">
+        <a-input v-model="email" placeholder="请输入找回密码的邮箱地址"></a-input>
+      </a-modal>
     </div>
   </a-card>
 </template>
@@ -41,6 +50,9 @@ export default {
   name: 'Login',
   data () {
     return {
+      email: '',
+      visible: false,
+      confirmLoading: false,
       loading: false,
       error: '',
       activeKey: '1'
@@ -59,6 +71,29 @@ export default {
     this.$router.options.routes = []
   },
   methods: {
+    handleOk (e) {
+      let reg = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+      if (!this.email) {
+        this.$message.warning('请输入邮箱地址')
+      } else if (!reg.test(this.email)) {
+        this.$message.warning('邮箱地址格式验证不通过！')
+        return false
+      }
+      this.confirmLoading = true
+      this.$get('/cos/user-info/recover/password', {
+        email: this.email
+      }).then((r) => {
+        if (r.data.data) {
+          this.$message.success('重置密码发送成功！')
+        } else {
+          this.$message.warning('此邮箱地址已存在！')
+        }
+        this.visible = false
+        this.confirmLoading = false
+      }).catch((e) => {
+        this.confirmLoading = false
+      })
+    },
     doLogin () {
       if (this.activeKey === '1') {
         // 用户名密码登录

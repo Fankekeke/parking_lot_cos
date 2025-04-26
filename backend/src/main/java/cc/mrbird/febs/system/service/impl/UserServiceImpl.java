@@ -167,7 +167,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional
-    public void regist(String username, String password, String name) throws Exception {
+    public void regist(String username, String password, String name, String email) throws Exception {
         User user = new User();
         user.setPassword(MD5Util.encrypt(username, password));
         user.setUsername(username);
@@ -180,6 +180,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         UserInfo userInfo = new UserInfo();
         userInfo.setName(name);
+        userInfo.setEmail(email);
         userInfo.setCreateDate(DateUtil.formatDateTime(new Date()));
         userInfo.setCode("U-" + System.currentTimeMillis());
         userInfo.setUserId(Math.toIntExact(user.getUserId()));
@@ -210,6 +211,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             cacheService.saveUser(username);
         }
 
+    }
+
+    /**
+     * 重置密码
+     *
+     * @param username 用户
+     */
+    @Override
+    public void resetPasswordFix(String username, String randomString) throws Exception {
+        User user = new User();
+        user.setPassword(MD5Util.encrypt(username, randomString));
+
+        this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        // 重新将用户信息加载到 redis中
+        cacheService.saveUser(username);
     }
 
     private void setUserRoles(User user, String[] roles) {
